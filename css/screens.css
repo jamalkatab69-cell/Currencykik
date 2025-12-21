@@ -1,0 +1,31 @@
+.pair-icons {
+    position: relative;
+    width: 50px;
+    height: 50px;
+}
+
+.icon-large {
+    width: 35px;
+    position: absolute;
+    top: 5px;
+    right: 0;
+    z-index: 1;
+}
+
+.icon-small {
+    width: 25px;
+    position: absolute;
+    bottom: 5px;
+    left: 0;
+    z-index: 2;
+    border: 2px solid #121212; /* لإعطاء تأثير الفاصل بين الصورتين */
+    border-radius: 50%;
+}
+
+.rate-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    border-bottom: 1px solid #222;
+}
