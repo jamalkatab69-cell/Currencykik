@@ -1,16 +1,15 @@
-async function updateApp() {
-    console.log("جاري تحديث البيانات...");
-    const favorites = Store.getFavorites();
-    const symbols = favorites.join(',');
+// js/app.js
+async function refreshData() {
+    const favorites = Store.getFavorites(); // يجلب المفضلات من localStorage
+    const data = await Api.getRates(favorites.join(','));
+    UI.renderRates(data);
     
-    const data = await Api.getRates(symbols);
-    if (data) {
-        UI.renderRates(data);
-    }
+    // تحديث الوقت في الواجهة
+    console.log("Last Update: " + new Date().toLocaleTimeString());
 }
 
-// نظام التحديث كل ساعة (3600000 ميلي ثانية)
-setInterval(updateApp, 3600000);
+// التحديث الأول
+refreshData();
 
-// التحديث الأول عند تشغيل التطبيق
-window.onload = updateApp;
+// التكرار كل ساعة (60 دقيقة * 60 ثانية * 1000 ميللي ثانية)
+setInterval(refreshData, 3600000);
