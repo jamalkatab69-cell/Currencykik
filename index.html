@@ -1,81 +1,48 @@
 <!DOCTYPE html>
-<html lang="ar" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professional Currency Pro</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Currency Pro Max</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/screens.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="style.css">
 </head>
 <body class="dark-mode">
-
-    <div class="app-container">
+    <div id="app">
         <section id="rates-screen" class="screen active">
-            <header>
-                <div class="header-icon plus" onclick="alert('Feature: Add Currency Window')">+</div>
-                <h2>Rates</h2>
-            </header>
-            <div class="label-section">Favourites</div>
-            <div id="rates-list"></div>
+            <div class="header">
+                <button id="add-currency">+</button>
+                <h2>الأسعار</h2>
+            </div>
+            <div id="rates-container"></div>
         </section>
 
         <section id="convert-screen" class="screen">
-            <header><h2>Convert</h2></header>
-            <div class="convert-box">
-                <div class="input-card">
-                    <input type="number" id="from-amount" value="1" oninput="performConversion()">
-                    <select id="from-currency" onchange="performConversion()">
-                        <option value="USD">USD 🇺🇸</option>
-                        <option value="EUR">EUR 🇪🇺</option>
-                        <option value="SAR">SAR 🇸🇦</option>
-                        <option value="GBP">GBP 🇬🇧</option>
-                    </select>
+            <h2>المحول</h2>
+            <div class="converter-card">
+                <div class="input-box">
+                    <input type="number" id="from-value" value="1">
+                    <select id="from-select"></select>
                 </div>
-                
-                <div class="swap-divider">
-                    <div class="swap-circle" onclick="swapCurrencies()"><i class="fas fa-exchange-alt fa-rotate-90"></i></div>
+                <button id="swap-btn">⇅</button>
+                <div class="input-box">
+                    <input type="number" id="to-value" readonly>
+                    <select id="to-select"></select>
                 </div>
-
-                <div class="input-card">
-                    <input type="text" id="to-amount" readonly placeholder="النتيجة">
-                    <select id="to-currency" onchange="performConversion()">
-                        <option value="JPY">JPY 🇯🇵</option>
-                        <option value="SAR">SAR 🇸🇦</option>
-                        <option value="USD">USD 🇺🇸</option>
-                        <option value="EUR">EUR 🇪🇺</option>
-                    </select>
-                </div>
-
-                <div class="info-note">
-                    <span id="rate-text">جاري حساب السعر...</span>
-                </div>
-            </div>
-        </section>
-
-        <section id="settings-screen" class="screen">
-            <header><h2>Settings</h2></header>
-            <div class="settings-content">
-                <div class="setting-row">
-                    <span>Dark mode</span>
-                    <div class="toggle-switch">
-                        <button onclick="setDarkMode(false)">Off</button>
-                        <button class="active" id="dark-btn" onclick="setDarkMode(true)">On</button>
-                    </div>
-                </div>
-                <div class="label-section">General settings</div>
-                <div class="menu-item" onclick="alert('شكراً لتقييمك!')">Rate the app <span>😊</span></div>
-                <div class="version-text">Version 2.9.0</div>
             </div>
         </section>
 
         <nav class="bottom-nav">
-            <div class="nav-item" onclick="showScreen('settings-screen', this)"><i class="fas fa-cog"></i><span>Settings</span></div>
-            <div class="nav-item" onclick="showScreen('convert-screen', this)"><i class="fas fa-exchange-alt"></i><span>Convert</span></div>
-            <div class="nav-item active" onclick="showScreen('rates-screen', this)"><i class="fas fa-chart-line"></i><span>Rates</span></div>
+            <button onclick="showScreen('settings')">الإعدادات</button>
+            <button onclick="showScreen('convert')">تحويل</button>
+            <button onclick="showScreen('rates')" class="active">الأسعار</button>
         </nav>
     </div>
 
-    <script src="script.js"></script>
+    <script src="js/store.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>
