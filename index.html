@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency App - TwelveData</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-mode">
+
+    <div class="app-container">
+        <section id="rates-screen" class="screen active">
+            <header>
+                <div class="header-icon plus">+</div>
+                <h2>Rates</h2>
+            </header>
+            <div class="label-section">Favourites</div>
+            <div id="rates-list">
+                <div class="loading">جاري تحميل البيانات...</div>
+            </div>
+        </section>
+
+        <section id="convert-screen" class="screen">
+            <header>
+                <h2>Convert</h2>
+            </header>
+            <div class="convert-box">
+                <div class="input-card">
+                    <input type="number" id="amount-input" value="1000">
+                    <div class="currency-selector">
+                        <span>USD</span> <img src="https://flagcdn.com/w20/us.png" alt="us">
+                    </div>
+                </div>
+                
+                <div class="swap-divider">
+                    <div class="swap-circle"><i class="fas fa-exchange-alt fa-rotate-90"></i></div>
+                </div>
+
+                <div class="input-card">
+                    <input type="text" id="result-output" readonly placeholder="Result">
+                    <div class="currency-selector">
+                        <span>JPY</span> <img src="https://flagcdn.com/w20/jp.png" alt="jp">
+                    </div>
+                </div>
+
+                <div class="info-note">
+                    USD = <span id="live-rate">...</span> JPY at the mid-market rate
+                </div>
+            </div>
+        </section>
+
+        <section id="settings-screen" class="screen">
+            <header><h2>Settings</h2></header>
+            <div class="settings-content">
+                <div class="setting-row">
+                    <span>Dark mode</span>
+                    <div class="toggle-switch">
+                        <button>Off</button>
+                        <button class="active">On</button>
+                        <button>Auto</button>
+                    </div>
+                </div>
+                <div class="label-section">General settings</div>
+                <div class="menu-item">Rate the app <span>😊</span></div>
+                <div class="menu-item">Terms and privacy <span>ⓘ</span></div>
+                <div class="version-text">Version 2.9.0</div>
+            </div>
+        </section>
+
+        <nav class="bottom-nav">
+            <div class="nav-item" onclick="showScreen('settings-screen')">
+                <i class="fas fa-cog"></i><span>Settings</span>
+            </div>
+            <div class="nav-item" onclick="showScreen('convert-screen')">
+                <i class="fas fa-exchange-alt"></i><span>Convert</span>
+            </div>
+            <div class="nav-item active" onclick="showScreen('rates-screen')">
+                <i class="fas fa-chart-line"></i><span>Rates</span>
+            </div>
+        </nav>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
