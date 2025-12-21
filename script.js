@@ -1,82 +1,115 @@
 const API_KEY = 'b83fce53976843bbb59336c03f9a6a30';
-const pairs = ['EUR/USD', 'USD/EUR', 'SAR/USD', 'USD/SAR', 'USD/CAD', 'USD/GBP'];
+let currentRates = {};
 
-// وظيفة التنقل بين الصفحات
-function showScreen(screenId) {
+// 1. التنقل بين الشاشات
+function showScreen(screenId, element) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    
     document.getElementById(screenId).classList.add('active');
-    event.currentTarget.classList.add('active');
+    element.classList.add('active');
 }
 
-// جلب البيانات وبناء الرسوم البيانية
-async function loadRatesData() {
-    const ratesList = document.getElementById('rates-list');
-    ratesList.innerHTML = ''; 
-
-    for (const pair of pairs) {
-        try {
-            // جلب بيانات تاريخية (آخر 10 ساعات) لرسم المنحنى
-            const res = await fetch(`https://api.twelvedata.com/time_series?symbol=${pair}&interval=1h&outputsize=10&apikey=${API_KEY}`);
-            const data = await res.json();
-            
-            if (data.status === 'ok') {
-                const history = data.values.map(v => parseFloat(v.close)).reverse();
-                const latestPrice = history[history.length - 1];
-                const isGrowing = latestPrice >= history[0];
-                
-                createRateRow(pair, latestPrice, history, isGrowing);
-            }
-        } catch (err) {
-            console.error("Error loading " + pair, err);
-        }
+// 2. جلب الأسعار الحقيقية للشاشة الرئيسية
+async function fetchLiveRates() {
+    const pairs = "EUR/USD,USD/JPY,SAR/USD,GBP/USD,USD/SAR";
+    const url = `https://api.twelvedata.com/price?symbol=${pairs}&apikey=${API_KEY}`;
+    
+    try {
+        const response = await fetch(url);
+        currentRates = await response.json();
+        renderRatesList();
+    } catch (error) {
+        console.error("خطأ في جلب البيانات:", error);
     }
 }
 
-function createRateRow(pair, price, history, isGrowing) {
-    const ratesList = document.getElementById('rates-list');
-    const canvasId = `chart-${pair.replace('/', '-')}`;
+function renderRatesList() {
+    const list = document.getElementById('rates-list');
+    list.innerHTML = '';
     
-    const row = document.createElement('div');
-    row.className = 'rate-card';
-    row.innerHTML = `
-        <div class="chart-box">
-            <canvas id="${canvasId}"></canvas>
-        </div>
-        <div class="rate-info">
-            <div class="pair-name">${pair.replace('/', ' to ')}</div>
-            <div class="pair-value">${pair.split('/')[0]} = ${price.toFixed(4)} ${pair.split('/')[1]} 1</div>
-        </div>
-    `;
-    ratesList.appendChild(row);
+    Object.keys(currentRates).forEach(pair => {
+        const price = parseFloat(currentRates[pair].price).toFixed(4);
+        const item = document.createElement('div');
+        item.className = 'rate-card';
+        item.innerHTML = `
+            <div class="chart-box"><canvas id="chart-${pair.replace('/','-')}"></canvas></div>
+            <div class="rate-info">
+                <div class="pair-name">${pair}</div>
+                <div class="pair-value">1 ${pair.split('/')[0]} = ${price} ${pair.split('/')[1]}</div>
+            </div>
+            <i class="fas fa-trash-alt" style="color: #444; margin-left:10px;" onclick="this.parentElement.remove()"></i>
+        `;
+        list.appendChild(item);
+        drawSimpleChart(`chart-${pair.replace('/','-')}`);
+    });
+}
 
-    // رسم المنحنى المتعرج
+// 3. منطق المحول (Convert Logic)
+async function performConversion() {
+    const from = document.getElementById('from-currency').value;
+    const to = document.getElementById('to-currency').value;
+    const amount = document.getElementById('from-amount').value;
+    
+    if(from === to) {
+        document.getElementById('to-amount').value = amount;
+        return;
+    }
+
+    const pair = `${from}/${to}`;
+    try {
+        const res = await fetch(`https://api.twelvedata.com/price?symbol=${pair}&apikey=${API_KEY}`);
+        const data = await res.json();
+        const rate = parseFloat(data.price);
+        
+        document.getElementById('to-amount').value = (amount * rate).toFixed(2);
+        document.getElementById('rate-text').innerText = `1 ${from} = ${rate.toFixed(4)} ${to}`;
+    } catch (e) {
+        document.getElementById('rate-text').innerText = "خطأ في الاتصال";
+    }
+}
+
+// 4. تبديل العملات (Swap)
+function swapCurrencies() {
+    const fromSelect = document.getElementById('from-currency');
+    const toSelect = document.getElementById('to-currency');
+    const temp = fromSelect.value;
+    fromSelect.value = toSelect.value;
+    toSelect.value = temp;
+    performConversion();
+}
+
+// 5. التحكم في الوضع الليلي
+function setDarkMode(isDark) {
+    if(isDark) {
+        document.body.classList.add('dark-mode');
+        document.getElementById('dark-btn').classList.add('active');
+    } else {
+        document.body.classList.remove('dark-mode');
+        document.getElementById('dark-btn').classList.remove('active');
+    }
+}
+
+// رسم منحنى تجريبي لكل عملة
+function drawSimpleChart(canvasId) {
     const ctx = document.getElementById(canvasId).getContext('2d');
     new Chart(ctx, {
         type: 'line',
         data: {
-            labels: history,
+            labels: [1, 2, 3, 4, 5, 6],
             datasets: [{
-                data: history,
-                borderColor: isGrowing ? '#4CAF50' : '#FF5252',
+                data: [Math.random(), Math.random(), Math.random(), Math.random(), Math.random(), Math.random()],
+                borderColor: '#4CAF50',
                 borderWidth: 2,
                 pointRadius: 0,
-                fill: false,
-                tension: 0.4
+                fill: false
             }]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: { x: { display: false }, y: { display: false } }
-        }
+        options: { plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
     });
-
-    // تحديث المحول تلقائياً بأول سعر
-    if(pair === 'USD/JPY') document.getElementById('live-rate').innerText = price.toFixed(4);
 }
 
-// تشغيل التطبيق
-loadRatesData();
+// تشغيل عند التحميل
+window.onload = () => {
+    fetchLiveRates();
+    performConversion();
+};
