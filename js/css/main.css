@@ -1,0 +1,24 @@
+:root {
+    --primary-green: #4CAF50;
+    --dark-bg: #121212;
+    --card-bg: #1e1e1e;
+}
+
+body {
+    background: var(--dark-bg);
+    color: white;
+    font-family: Arial, sans-serif;
+    margin: 0;
+}
+
+/* استخدام صور الأعلام من GitHub */
+.flag-icon {
+    width: 25px;
+    height: 18px;
+    background-size: cover;
+    display: inline-block;
+}
+
+/* مثال لتعيين علم السعودية من ملفاتك */
+.flag-SAR { background-image: url('../assets/flags/sar.png'); }
+.flag-USD { background-image: url('../assets/flags/usd.png'); }
