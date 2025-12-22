@@ -1,18 +1,17 @@
 const API_KEY = 'b83fce53976843bbb59336c03f9a6a30';
+const BASE_URL = 'https://api.twelvedata.com';
 
-const Api = {
-    async getRates(symbols) {
+export const CurrencyAPI = {
+    // جلب الأسعار لجميع العملات في طلب واحد (Batch)
+    async getAllRates(symbols) {
+        const query = symbols.join('/USD,') + '/USD';
         try {
-            const response = await fetch(`https://api.twelvedata.com/price?symbol=${symbols}&apikey=${API_KEY}`);
+            const response = await fetch(`${BASE_URL}/price?symbol=${query}&apikey=${API_KEY}`);
+            if (!response.ok) throw new Error('Network response was not ok');
             return await response.json();
         } catch (error) {
-            console.error("خطأ في جلب الأسعار:", error);
+            console.error("Fetch Error:", error);
+            return null;
         }
-    },
-    
-    async getHistory(symbol) {
-        // جلب بيانات تاريخية لآخر 24 ساعة للرسم البياني
-        const response = await fetch(`https://api.twelvedata.com/time_series?symbol=${symbol}&interval=1h&outputsize=24&apikey=${API_KEY}`);
-        return await response.json();
     }
 };
