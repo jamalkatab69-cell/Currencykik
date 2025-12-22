@@ -1,61 +1,53 @@
-import { CONFIG } from './config.js';
-import { API } from './api.js';
-import { Storage } from './storage.js';
-import { Converter } from './converter.js';
-import { UIManager } from './ui-manager.js';
-import { Navigation } from './navigation.js';
-import { Events } from './events.js';
-import { ThemeEngine } from './theme-engine.js';
+// app.js
+import { CONFIG } from "./config.js";
+import { fetchRates, convertCurrency } from "./api.js";
 
-let currentRates = {};
+// عناصر الواجهة
+const ratesListEl = document.getElementById("rates-list");
+const amountInput = document.getElementById("amount-input");
+const fromSelect = document.getElementById("from-select");
+const toSelect = document.getElementById("to-select");
+const resultEl = document.getElementById("convert-result");
 
-async function init() {
-    ThemeEngine.init();
-    Navigation.init();
-    
-    // 1. تعبئة القوائم المنسدلة
-    const fromSelect = document.getElementById('from-currency');
-    const toSelect = document.getElementById('to-currency');
-    Object.keys(CONFIG.CURRENCIES).forEach(code => {
-        fromSelect.add(new Option(code, code));
-        toSelect.add(new Option(code, code));
+// أزواج العملات المراد عرضها
+const symbols = ["EUR/USD","USD/EUR","USD/JPY","USD/GBP","USD/CAD"];
+
+async function updateRates() {
+  try {
+    const data = await fetchRates(symbols);
+    ratesListEl.innerHTML = "";
+    symbols.forEach(sym => {
+      const rate = data[sym].rate;
+      const [base, quote] = sym.split("/");
+      const iconUrl = CONFIG.ICON_BASE + `${base === "USD" ? "101-currency-usd.png" : "100-currency-eur.png"}`;
+      const div = document.createElement("div");
+      div.className = "rate-item";
+      div.innerHTML = `
+        <img src="${iconUrl}" class="icon">
+        <span>${sym}: ${rate}</span>
+      `;
+      ratesListEl.appendChild(div);
     });
-
-    fromSelect.value = "EUR";
-    toSelect.value = "USD";
-
-    // 2. جلب البيانات (من التخزين أو الـ API)
-    currentRates = Storage.getRates();
-    if (!currentRates) {
-        currentRates = await API.fetchBatchRates();
-        if (currentRates) Storage.saveRates(currentRates);
-    }
-
-    // 3. ربط الأحداث
-    Events.bindAmountInput(updateLogic);
-    Events.bindCurrencyChange(updateLogic);
-    Events.bindSwap(() => {
-        const from = fromSelect.value;
-        fromSelect.value = toSelect.value;
-        toSelect.value = from;
-        updateLogic();
-    });
-
-    updateLogic();
-    UIManager.renderRatesList(currentRates);
+  } catch (err) {
+    ratesListEl.innerHTML = `<p class="error">خطأ في جلب الأسعار</p>`;
+  }
 }
 
-function updateLogic() {
-    const amt = document.getElementById('amount').value;
-    const from = document.getElementById('from-currency').value;
-    const to = document.getElementById('to-currency').value;
-
-    const result = Converter.convert(amt, currentRates[from], currentRates[to]);
-    
-    UIManager.renderResult(result);
-    UIManager.updateFlags(from, to);
-    UIManager.updateCurrencyIcons(from, to);
-    UIManager.setInfo(`1 ${from} = ${(currentRates[to]/currentRates[from]).toFixed(4)} ${to}`);
+async function handleConvert() {
+  const amount = parseFloat(amountInput.value);
+  const from = fromSelect.value;
+  const to = toSelect.value;
+  try {
+    const result = await convertCurrency(from, to, amount);
+    resultEl.textContent = `${amount} ${from} = ${result.toFixed(2)} ${to}`;
+  } catch (err) {
+    resultEl.textContent = "خطأ في التحويل";
+  }
 }
 
-init();
+// تحديث دوري
+updateRates();
+setInterval(updateRates, CONFIG.REFRESH_MS);
+
+// زر التحويل
+document.getElementById("btn-convert").addEventListener("click", handleConvert);
