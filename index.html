@@ -1,46 +1,96 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Currencykik - محول العملات</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="main.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>محول العملات</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <!-- رأس بسيط -->
+  <header class="app-header">
+    <h1>محول العملات</h1>
+    <div id="last-update" class="subtext">جارِ التحديث...</div>
+  </header>
 
-    <div class="converter-container">
-        <h2>Convert</h2>
-
-        <div class="currency-row">
-            <div class="flag-wrapper">
-                <img src="path_to_eu_flag.png" alt="EUR" class="currency-flag" id="from-flag">
-            </div>
-            <div class="input-group">
-                <input type="number" id="amount" value="1000">
-                <select id="from-currency">
-                    <option value="EUR">EUR</option>
-                    </select>
-            </div>
-        </div>
-
-        <button class="swap-btn">⇅</button>
-
-        <div class="currency-row">
-            <div class="flag-wrapper">
-                <img src="path_to_us_flag.png" alt="USD" class="currency-flag" id="to-flag">
-            </div>
-            <div class="input-group">
-                <input type="number" id="result" value="0.00" readonly>
-                <select id="to-currency">
-                    <option value="USD">USD</option>
-                </select>
-            </div>
-        </div>
+  <!-- الشاشة: الأسعار -->
+  <main id="screen-rates" class="screen active">
+    <div class="toolbar">
+      <button id="btn-refresh" class="btn primary">تحديث الآن</button>
     </div>
+    <div id="rates-list" class="card-list"></div>
+    <div id="rates-error" class="error hidden"></div>
+  </main>
 
-    <script src="config.js"></script>
-    <script src="api.js"></script>
-    <script src="app.js"></script>
+  <!-- الشاشة: التحويل -->
+  <main id="screen-convert" class="screen">
+    <div class="convert-card">
+      <div class="row">
+        <label>المبلغ</label>
+        <input type="number" id="amount-input" placeholder="أدخل المبلغ" min="0" step="0.01" />
+      </div>
+
+      <div class="row currency-row">
+        <div class="col">
+          <label>من</label>
+          <div class="currency-select">
+            <img id="from-icon" class="currency-icon" alt="من" />
+            <select id="from-select"></select>
+          </div>
+        </div>
+        <button id="btn-swap" class="btn icon" title="تبديل">⇄</button>
+        <div class="col">
+          <label>إلى</label>
+          <div class="currency-select">
+            <img id="to-icon" class="currency-icon" alt="إلى" />
+            <select id="to-select"></select>
+          </div>
+        </div>
+      </div>
+
+      <div class="row actions">
+        <button id="btn-convert" class="btn primary">تحويل</button>
+      </div>
+
+      <div id="convert-result" class="result"></div>
+      <div id="convert-hint" class="subtext">يتم التحويل حسب سعر السوق المتوسط</div>
+      <div id="convert-error" class="error hidden"></div>
+    </div>
+  </main>
+
+  <!-- الشاشة: الإعدادات -->
+  <main id="screen-settings" class="screen">
+    <section class="settings-card">
+      <h2>الوضع <div class="segmented">
+        <button data-theme="off" class="segment">إيقاف</button>
+        <button data-theme="on" class="segment">تشغيل</button>
+        <button data-theme="auto" class="segment active">تلقائي</button>
+      </div>
+    </section>
+
+    <section class="settings-card">
+      <h2>إعدادات عامة</h2>
+      <div class="settings-list">
+        <a href="#" class="settings-item">
+          <span>تقييم التطبيق</span>
+          <span>😊</span>
+        </a>
+        <a href="#" class="settings-item">
+          <span>الشروط والخصوصية</span>
+          <span>⚠️</span>
+        </a>
+      </div>
+      <div class="version">الإصدار 2.9.0</div>
+    </section>
+  </main>
+
+  <!-- شريط التنقل السفلي -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-target="rates">الأسعار</button>
+    <button class="nav-btn" data-target="convert">تحويل</button>
+    <button class="nav-btn" data-target="settings">الإعدادات</button>
+  </nav>
+
+  <script src="script.js"></script>
 </body>
 </html>
