@@ -3,157 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>محول العملات</title>
+    <title>Currencykik - محول العملات</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="light-mode">
+<body>
     <div class="app-container">
-        <!-- الصفحة 1: التحويل -->
-        <section id="convert-page" class="page active">
-            <div class="app-header">
-                <h1 class="page-title"><i class="fas fa-exchange-alt"></i> تحويل العملات</h1>
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo">
+                <span class="logo-text">Pidmage</span>
             </div>
+            <button class="menu-btn" id="menuBtn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </header>
+
+        <!-- صفحة التحويل -->
+        <div id="convertPage" class="page active">
+            <h1 class="page-title">Convert</h1>
             
-            <div class="conversion-container">
-                <!-- العملة الأصلية -->
-                <div class="currency-box from-currency">
-                    <div class="amount-display" id="from-amount">1,000</div>
+            <div class="converter-container">
+                <!-- العملة الأولى -->
+                <div class="currency-input-card">
+                    <input type="number" id="amount1" class="amount-input" value="1000" placeholder="0">
                     <div class="currency-selector">
-                        <img src="https://raw.githubusercontent.com/jamalkatabeuro-sketch/My-website/main/101-currency-usd.png" 
-                             alt="USD" class="currency-flag" id="from-flag">
-                        <select class="currency-dropdown" id="from-currency-select">
-                            <!-- سيتم تعبئته بـ JS -->
+                        <select id="currency1" class="currency-select">
+                            <!-- سيتم ملؤها من JS -->
                         </select>
-                        <span class="currency-code" id="from-code">USD</span>
+                        <span class="currency-flag" id="flag1">🇺🇸</span>
                     </div>
                 </div>
-                
+
                 <!-- زر التبديل -->
-                <div class="swap-container">
-                    <button class="swap-btn" id="swap-currencies">
-                        <i class="fas fa-exchange-alt"></i>
-                    </button>
-                </div>
-                
-                <!-- العملة الهدف -->
-                <div class="currency-box to-currency">
-                    <div class="amount-display" id="to-amount">1,505</div>
+                <button class="swap-btn" id="swapBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2"/>
+                        <path d="M17 14L12 9L7 14" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </button>
+
+                <!-- العملة الثانية -->
+                <div class="currency-input-card">
+                    <input type="number" id="amount2" class="amount-input" value="0" readonly placeholder="0">
                     <div class="currency-selector">
-                        <img src="https://raw.githubusercontent.com/jamalkatabeuro-sketch/My-website/main/113-currency-jpy.png" 
-                             alt="JPY" class="currency-flag" id="to-flag">
-                        <select class="currency-dropdown" id="to-currency-select">
-                            <!-- سيتم تعبئته بـ JS -->
+                        <select id="currency2" class="currency-select">
+                            <!-- سيتم ملؤها من JS -->
                         </select>
-                        <span class="currency-code" id="to-code">JPY</span>
+                        <span class="currency-flag" id="flag2">🇯🇵</span>
                     </div>
                 </div>
-                
-                <!-- معلومات سعر الصرف -->
-                <div class="rate-info" id="rate-info">
-                    <i class="fas fa-info-circle"></i>
-                    <span>1 USD = 150.5 JPY</span>
+
+                <!-- عرض السعر -->
+                <div class="rate-display" id="rateDisplay">
+                    <span>USD = 157.385 JPY at the mid-market 1 rate</span>
+                    <span class="trend-icon">↘</span>
                 </div>
-                
-                <!-- زر التحويل -->
-                <button class="convert-btn" id="convert-btn">
-                    <i class="fas fa-sync-alt"></i> تحويل
-                </button>
             </div>
-        </section>
-        
-        <!-- الصفحة 2: الأسعار -->
-        <section id="rates-page" class="page">
-            <div class="app-header">
-                <h1 class="page-title"><i class="fas fa-chart-line"></i> أسعار العملات</h1>
+        </div>
+
+        <!-- صفحة الأسعار -->
+        <div id="ratesPage" class="page">
+            <div class="page-header">
+                <h1 class="page-title">Rates</h1>
+                <button class="add-btn" id="addFavoriteBtn">+</button>
             </div>
             
-            <div class="rates-container">
-                <div class="search-box">
-                    <input type="text" id="search-input" placeholder="ابحث عن عملة...">
-                    <i class="fas fa-search"></i>
-                </div>
-                
-                <div class="rates-list" id="rates-list">
-                    <!-- سيتم تعبئته بـ JS -->
-                </div>
+            <div id="ratesContainer" class="rates-container">
+                <!-- سيتم ملؤها من JS -->
             </div>
-        </section>
-        
-        <!-- الصفحة 3: الإعدادات -->
-        <section id="settings-page" class="page">
-            <div class="app-header">
-                <h1 class="page-title"><i class="fas fa-cog"></i> الإعدادات</h1>
+            
+            <div class="update-info">
+                <span id="ratesLastUpdate">آخر تحديث: --</span>
+                <button class="refresh-btn" id="refreshRatesBtn">تحديث</button>
             </div>
+        </div>
+
+        <!-- صفحة الإعدادات -->
+        <div id="settingsPage" class="page">
+            <h1 class="page-title">Settings</h1>
             
             <div class="settings-container">
-                <!-- الوضع المظلم -->
+                <!-- الوضع الداكن -->
                 <div class="setting-section">
-                    <h3><i class="fas fa-moon"></i> الوضع المظلم</h3>
-                    <div class="toggle-options">
-                        <button class="toggle-option" data-mode="light" id="light-mode">
-                            <i class="fas fa-sun"></i> فاتح
+                    <h3 class="setting-title">Dark mode</h3>
+                    <div class="dark-mode-buttons">
+                        <button class="dark-mode-btn" data-mode="off">Off</button>
+                        <button class="dark-mode-btn active" data-mode="on">On</button>
+                        <button class="dark-mode-btn" data-mode="auto">Auto</button>
+                    </div>
+                </div>
+
+                <!-- الإعدادات العامة -->
+                <div class="setting-section">
+                    <h3 class="setting-title">General settings</h3>
+                    
+                    <div class="setting-item">
+                        <span>Rate the app</span>
+                        <button class="setting-btn">
+                            <span class="emoji">😊</span>
                         </button>
-                        <button class="toggle-option active" data-mode="dark" id="dark-mode">
-                            <i class="fas fa-moon"></i> مظلم
-                        </button>
-                        <button class="toggle-option" data-mode="auto" id="auto-mode">
-                            <i class="fas fa-adjust"></i> تلقائي
+                    </div>
+                    
+                    <div class="setting-item">
+                        <span>Terms and privacy</span>
+                        <button class="setting-btn">
+                            <span class="emoji">⚠️</span>
                         </button>
                     </div>
                 </div>
-                
-                <!-- إعدادات عامة -->
-                <div class="setting-section">
-                    <h3><i class="fas fa-sliders-h"></i> إعدادات عامة</h3>
-                    <div class="settings-list">
-                        <button class="setting-item">
-                            <i class="fas fa-star"></i>
-                            <span>تقييم التطبيق</span>
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-                        <button class="setting-item">
-                            <i class="fas fa-shield-alt"></i>
-                            <span>الشروط والخصوصية</span>
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-                        <div class="version-info">
-                            <i class="fas fa-code"></i>
-                            <span>الإصدار 2.9.0</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- تحديث الأسعار -->
-                <div class="setting-section">
-                    <h3><i class="fas fa-sync"></i> تحديث البيانات</h3>
-                    <button class="refresh-btn" id="refresh-rates">
-                        <i class="fas fa-redo"></i> تحديث الأسعار الآن
-                    </button>
-                    <div class="last-update" id="last-update">
-                        آخر تحديث: 2024-01-01 10:30
-                    </div>
+
+                <!-- رقم الإصدار -->
+                <div class="version-info">
+                    <span>Version 2.9.0</span>
                 </div>
             </div>
-        </section>
-        
+        </div>
+
         <!-- شريط التنقل السفلي -->
         <nav class="bottom-nav">
-            <button class="nav-btn active" data-page="convert">
-                <i class="fas fa-exchange-alt"></i>
-                <span>تحويل</span>
+            <button class="nav-btn" id="navSettings" onclick="showPage('settings')">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 1v6m0 6v6M23 12h-6m-6 0H1" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                <span>Settings</span>
             </button>
-            <button class="nav-btn" data-page="rates">
-                <i class="fas fa-chart-line"></i>
-                <span>أسعار</span>
+            
+            <button class="nav-btn active" id="navConvert" onclick="showPage('convert')">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2"/>
+                    <path d="M17 14L12 9L7 14" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                <span>Convert</span>
             </button>
-            <button class="nav-btn" data-page="settings">
-                <i class="fas fa-cog"></i>
-                <span>إعدادات</span>
+            
+            <button class="nav-btn" id="navRates" onclick="showPage('rates')">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M3 3v18h18" stroke="currentColor" stroke-width="2"/>
+                    <path d="M6 15l4-4 3 3 5-7" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                <span>Rates</span>
             </button>
         </nav>
     </div>
 
-    <script src="app.js" type="module"></script>
+    <script type="module" src="app.js"></script>
 </body>
 </html>
