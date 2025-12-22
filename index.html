@@ -3,54 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Currency App Pro</title>
+    <title>Currencykik - محول العملات</title>
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="main.css">
-    <link rel="stylesheet" href="components.css">
-    <link rel="stylesheet" href="animations.css">
 </head>
-<body class="dark-mode">
-    <div class="app-container">
-        <section id="convert-screen" class="screen">
-            <header><h1>Convert</h1></header>
-            
-            <div class="input-card">
+<body>
+
+    <div class="converter-container">
+        <h2>Convert</h2>
+
+        <div class="currency-row">
+            <div class="flag-wrapper">
+                <img src="path_to_eu_flag.png" alt="EUR" class="currency-flag" id="from-flag">
+            </div>
+            <div class="input-group">
                 <input type="number" id="amount" value="1000">
-                <div class="selector">
-                    <select id="from-currency"></select>
-                    <img id="from-flag" class="flag-circle">
-                </div>
+                <select id="from-currency">
+                    <option value="EUR">EUR</option>
+                    </select>
             </div>
+        </div>
 
-            <div class="swap-container">
-                <button id="swap-currencies" class="swap-btn">⇅</button>
+        <button class="swap-btn">⇅</button>
+
+        <div class="currency-row">
+            <div class="flag-wrapper">
+                <img src="path_to_us_flag.png" alt="USD" class="currency-flag" id="to-flag">
             </div>
-
-            <div class="input-card">
-                <input type="text" id="result" readonly>
-                <div class="selector">
-                    <select id="to-currency"></select>
-                    <img id="to-flag" class="flag-circle">
-                </div>
+            <div class="input-group">
+                <input type="number" id="result" value="0.00" readonly>
+                <select id="to-currency">
+                    <option value="USD">USD</option>
+                </select>
             </div>
-
-            <div class="info-box">
-                <p id="exchange-info">جاري التحميل...</p>
-                <img id="from-icon-x" class="big-icon">
-            </div>
-        </section>
-
-        <section id="rates-screen" class="screen hidden">
-            <header><h1>Market Rates</h1></header>
-            <div id="rates-container" class="rates-list"></div>
-        </section>
-
-        <nav class="bottom-nav">
-            <div class="nav-item" data-screen="settings"><span>⚙</span><br>Settings</div>
-            <div class="nav-item active" data-screen="convert"><span>↔</span><br>Convert</div>
-            <div class="nav-item" data-screen="rates"><span>📈</span><br>Rates</div>
-        </nav>
+        </div>
     </div>
 
-    <script type="module" src="app.js"></script>
+    <script src="config.js"></script>
+    <script src="api.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
