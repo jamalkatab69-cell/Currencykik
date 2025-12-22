@@ -1,595 +1,482 @@
-/* إعادة التعيين */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', 'Cairo', sans-serif;
 }
 
 :root {
-    /* الألوان للوضع الفاتح */
-    --bg-color: #f5f5f7;
-    --card-color: #ffffff;
-    --text-color: #1d1d1f;
-    --border-color: #d2d2d7;
-    --primary-color: #007aff;
-    --secondary-color: #5856d6;
-    --success-color: #34c759;
-    --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2a2a2a;
+    --bg-card: #1e1e1e;
+    --text-primary: #ffffff;
+    --text-secondary: #b3b3b3;
+    --accent-color: #0084ff;
+    --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --success-color: #4ade80;
+    --error-color: #f87171;
+    --border-color: #3a3a3a;
 }
 
-/* الوضع المظلم */
-body.dark-mode {
-    --bg-color: #000000;
-    --card-color: #1d1d1f;
-    --text-color: #f5f5f7;
-    --border-color: #424245;
-    --primary-color: #0a84ff;
-    --secondary-color: #5e5ce6;
-    --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-/* تصميم عام */
 body {
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    transition: all 0.3s ease;
-    max-width: 100%;
-    overflow-x: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    direction: rtl;
 }
 
 .app-container {
-    max-width: 500px;
+    max-width: 480px;
     margin: 0 auto;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    padding: 20px;
-    position: relative;
-    padding-bottom: 80px;
+    background-color: var(--bg-primary);
 }
 
-/* العنوان */
+/* Header */
 .app-header {
-    padding: 20px 0;
-    text-align: center;
-    border-bottom: 1px solid var(--border-color);
-    margin-bottom: 30px;
-}
-
-.page-title {
-    font-size: 24px;
-    font-weight: 600;
-    color: var(--primary-color);
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    gap: 10px;
+    padding: 20px;
+    background-color: var(--bg-secondary);
 }
 
-/* الصفحات */
+.logo-text {
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.menu-btn {
+    background: none;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    cursor: pointer;
+    padding: 8px;
+}
+
+.menu-btn span {
+    width: 24px;
+    height: 2px;
+    background-color: var(--text-primary);
+    border-radius: 2px;
+}
+
+/* Pages */
 .page {
     display: none;
     flex: 1;
+    padding: 20px;
+    padding-bottom: 80px;
+    overflow-y: auto;
 }
 
 .page.active {
     display: block;
-    animation: fadeIn 0.3s ease;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-/* تصميم محول العملات */
-.conversion-container {
-    background: var(--card-color);
-    border-radius: 20px;
-    padding: 30px;
-    box-shadow: var(--shadow);
+.page-title {
+    font-size: 36px;
+    font-weight: bold;
     margin-bottom: 30px;
+    text-align: left;
 }
 
-.currency-box {
-    background: var(--bg-color);
-    border-radius: 15px;
-    padding: 20px;
-    margin: 15px 0;
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* Convert Page */
+.converter-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.currency-input-card {
+    background-color: var(--bg-card);
     border: 2px solid var(--border-color);
-    transition: all 0.3s ease;
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
-.currency-box:hover {
-    border-color: var(--primary-color);
-}
-
-.amount-display {
+.amount-input {
+    background: none;
+    border: none;
+    color: var(--text-primary);
     font-size: 48px;
-    font-weight: 700;
-    text-align: center;
-    margin-bottom: 15px;
-    color: var(--text-color);
-    direction: ltr;
-    letter-spacing: 1px;
+    font-weight: bold;
+    width: 100%;
+    outline: none;
+}
+
+.amount-input::placeholder {
+    color: var(--text-secondary);
+}
+
+.amount-input:read-only {
+    cursor: default;
 }
 
 .currency-selector {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 15px;
+    gap: 10px;
+}
+
+.currency-select {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px 15px;
+    font-size: 16px;
+    flex: 1;
+    cursor: pointer;
+    outline: none;
 }
 
 .currency-flag {
-    width: 40px;
-    height: 40px;
+    font-size: 32px;
+}
+
+.swap-btn {
+    align-self: center;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid var(--border-color);
-}
-
-.currency-dropdown {
-    flex: 1;
-    padding: 10px 15px;
-    border: 2px solid var(--border-color);
-    border-radius: 10px;
-    background: var(--card-color);
-    color: var(--text-color);
-    font-size: 16px;
-    font-weight: 500;
+    background: var(--accent-color);
+    border: none;
+    color: white;
     cursor: pointer;
-    outline: none;
-    transition: border-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s;
 }
 
-.currency-dropdown:hover {
-    border-color: var(--primary-color);
+.swap-btn:hover {
+    transform: scale(1.1);
 }
 
-.currency-dropdown option {
-    background: var(--card-color);
-    color: var(--text-color);
-    padding: 10px;
+.swap-btn:active {
+    transform: scale(0.95);
+}
+
+.rate-display {
+    background-color: var(--bg-secondary);
+    padding: 15px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.trend-icon {
+    font-size: 20px;
+    color: var(--error-color);
+}
+
+/* Rates Page */
+.rates-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.rates-section {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.section-title {
+    font-size: 18px;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+}
+
+.rate-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.rate-card:hover {
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
+}
+
+.rate-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.currency-pair {
+    display: flex;
+    gap: 8px;
+    font-size: 24px;
+}
+
+.rate-trend {
+    width: 60px;
+    height: 30px;
+}
+
+.trend-up {
+    color: var(--success-color);
+}
+
+.trend-down {
+    color: var(--error-color);
+}
+
+.rate-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
 }
 
 .currency-code {
     font-size: 18px;
     font-weight: 600;
-    color: var(--primary-color);
-    min-width: 60px;
-}
-
-/* زر التبديل */
-.swap-container {
-    display: flex;
-    justify-content: center;
-    margin: 10px 0;
-}
-
-.swap-btn {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 20px;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3);
-}
-
-.swap-btn:hover {
-    transform: rotate(180deg) scale(1.1);
-    background: var(--secondary-color);
-}
-
-/* معلومات سعر الصرف */
-.rate-info {
-    background: rgba(0, 122, 255, 0.1);
-    border: 1px solid rgba(0, 122, 255, 0.2);
-    border-radius: 10px;
-    padding: 12px 20px;
-    margin: 20px 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    color: var(--primary-color);
-    font-size: 14px;
-}
-
-.rate-info i {
-    font-size: 16px;
-}
-
-/* زر التحويل */
-.convert-btn {
-    width: 100%;
-    padding: 18px;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    color: white;
-    border: none;
-    border-radius: 15px;
-    font-size: 18px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    transition: all 0.3s ease;
-    margin-top: 20px;
-    box-shadow: 0 6px 20px rgba(0, 122, 255, 0.3);
-}
-
-.convert-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 122, 255, 0.4);
-}
-
-.convert-btn:active {
-    transform: translateY(0);
-}
-
-/* صفحة الأسعار */
-.rates-container {
-    background: var(--card-color);
-    border-radius: 20px;
-    padding: 20px;
-    box-shadow: var(--shadow);
-}
-
-.search-box {
-    position: relative;
-    margin-bottom: 20px;
-}
-
-.search-box input {
-    width: 100%;
-    padding: 15px 20px 15px 45px;
-    border: 2px solid var(--border-color);
-    border-radius: 12px;
-    background: var(--bg-color);
-    color: var(--text-color);
-    font-size: 16px;
-    outline: none;
-    transition: border-color 0.3s ease;
-}
-
-.search-box input:focus {
-    border-color: var(--primary-color);
-}
-
-.search-box i {
-    position: absolute;
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #8e8e93;
-}
-
-.rates-list {
-    max-height: 500px;
-    overflow-y: auto;
-}
-
-.rate-item {
-    display: flex;
-    align-items: center;
-    padding: 15px;
-    border-bottom: 1px solid var(--border-color);
-    transition: background-color 0.3s ease;
-    cursor: pointer;
-}
-
-.rate-item:hover {
-    background-color: var(--bg-color);
-}
-
-.rate-flag {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-left: 10px;
-    border: 2px solid var(--border-color);
-}
-
-.rate-info-content {
-    flex: 1;
-}
-
-.rate-pair {
-    font-weight: 600;
-    font-size: 16px;
-    color: var(--text-color);
-    margin-bottom: 3px;
 }
 
 .rate-value {
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--primary-color);
-    direction: ltr;
+    font-size: 14px;
+    color: var(--text-secondary);
 }
 
-.rate-date {
-    font-size: 12px;
-    color: #8e8e93;
-    margin-top: 3px;
+.add-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--accent-gradient);
+    border: none;
+    color: white;
+    font-size: 32px;
+    cursor: pointer;
+    line-height: 1;
 }
 
-/* صفحة الإعدادات */
+.update-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    padding: 15px;
+    background-color: var(--bg-secondary);
+    border-radius: 12px;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.refresh-btn {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+/* Settings Page */
 .settings-container {
-    background: var(--card-color);
-    border-radius: 20px;
-    padding: 20px;
-    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
 }
 
 .setting-section {
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
-.setting-section:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
-}
-
-.setting-section h3 {
+.setting-title {
     font-size: 18px;
-    margin-bottom: 15px;
-    color: var(--text-color);
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    color: var(--text-secondary);
 }
 
-/* أزرار الوضع المظلم */
-.toggle-options {
-    display: flex;
+.dark-mode-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 10px;
-}
-
-.toggle-option {
-    flex: 1;
-    padding: 15px;
-    background: var(--bg-color);
-    border: 2px solid var(--border-color);
+    background-color: var(--bg-secondary);
+    padding: 6px;
     border-radius: 12px;
-    color: var(--text-color);
-    font-size: 14px;
-    font-weight: 500;
+}
+
+.dark-mode-btn {
+    background-color: transparent;
+    border: none;
+    color: var(--text-primary);
+    padding: 12px;
+    border-radius: 8px;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: all 0.3s ease;
+    font-size: 16px;
+    transition: all 0.3s;
 }
 
-.toggle-option:hover {
-    border-color: var(--primary-color);
-}
-
-.toggle-option.active {
-    background: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
-}
-
-/* قائمة الإعدادات */
-.settings-list {
-    background: var(--bg-color);
-    border-radius: 12px;
-    overflow: hidden;
+.dark-mode-btn.active {
+    background-color: var(--bg-card);
 }
 
 .setting-item {
-    width: 100%;
-    padding: 18px 15px;
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid var(--border-color);
-    color: var(--text-color);
-    font-size: 16px;
-    text-align: right;
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.setting-item:hover {
-    background-color: rgba(0, 122, 255, 0.1);
-}
-
-.setting-item:last-child {
-    border-bottom: none;
-}
-
-.setting-item i:first-child {
-    color: var(--primary-color);
-    margin-left: 10px;
-}
-
-.setting-item i:last-child {
-    color: #8e8e93;
-}
-
-.version-info {
-    padding: 18px 15px;
-    display: flex;
     align-items: center;
-    color: #8e8e93;
-    font-size: 14px;
-}
-
-.version-info i {
-    margin-left: 10px;
-}
-
-/* زر التحديث */
-.refresh-btn {
-    width: 100%;
-    padding: 16px;
-    background: var(--success-color);
-    color: white;
-    border: none;
+    padding: 15px;
+    background-color: var(--bg-card);
     border-radius: 12px;
-    font-size: 16px;
-    font-weight: 500;
+}
+
+.setting-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--bg-secondary);
+    border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    transition: all 0.3s ease;
-    margin-bottom: 10px;
 }
 
-.refresh-btn:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
+.emoji {
+    font-size: 20px;
 }
 
-.last-update {
+.version-info {
     text-align: center;
-    font-size: 13px;
-    color: #8e8e93;
-    padding: 5px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    padding: 20px;
 }
 
-/* شريط التنقل السفلي */
+/* Bottom Navigation */
 .bottom-nav {
     position: fixed;
     bottom: 0;
-    left: 0;
-    right: 0;
-    background: var(--card-color);
-    display: flex;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 480px;
+    width: 100%;
+    background-color: var(--bg-secondary);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     padding: 10px;
+    gap: 10px;
     border-top: 1px solid var(--border-color);
-    max-width: 500px;
-    margin: 0 auto;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-    z-index: 100;
 }
 
 .nav-btn {
-    flex: 1;
-    padding: 12px 5px;
-    background: transparent;
+    background: none;
     border: none;
-    color: #8e8e93;
-    font-size: 12px;
-    cursor: pointer;
+    color: var(--text-secondary);
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 5px;
-    transition: all 0.3s ease;
-    border-radius: 10px;
-}
-
-.nav-btn i {
-    font-size: 20px;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 12px;
+    transition: all 0.3s;
 }
 
 .nav-btn.active {
-    color: var(--primary-color);
-    background: rgba(0, 122, 255, 0.1);
+    color: var(--accent-color);
+    background-color: rgba(0, 132, 255, 0.1);
 }
 
-.nav-btn:hover:not(.active) {
-    color: var(--text-color);
+.nav-btn span {
+    font-size: 12px;
 }
 
-/* التحميل والأخطاء */
+/* Loading & Error States */
 .loading {
     text-align: center;
-    padding: 30px;
-    color: var(--text-color);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
+    padding: 40px;
+    color: var(--text-secondary);
 }
 
-.loading i {
-    font-size: 40px;
-    color: var(--primary-color);
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.error-message {
-    background: rgba(255, 59, 48, 0.1);
-    border: 1px solid rgba(255, 59, 48, 0.3);
-    color: #ff3b30;
-    padding: 15px;
-    border-radius: 12px;
+.error {
     text-align: center;
-    margin: 10px 0;
-    font-size: 14px;
+    padding: 40px;
+    color: var(--error-color);
 }
 
-/* التمرير */
+/* Light Mode */
+html:not(.dark-mode) {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f5f5f5;
+    --bg-card: #ffffff;
+    --text-primary: #000000;
+    --text-secondary: #666666;
+    --border-color: #e0e0e0;
+}
+
+/* Scrollbar */
 ::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-    background: var(--bg-color);
-    border-radius: 10px;
+    background: var(--bg-secondary);
 }
 
 ::-webkit-scrollbar-thumb {
     background: var(--border-color);
-    border-radius: 10px;
+    border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--primary-color);
+    background: var(--accent-color);
 }
 
-/* التكيف مع الشاشات الصغيرة */
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.rate-card {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Responsive */
 @media (max-width: 480px) {
-    .app-container {
-        padding: 15px;
-        padding-bottom: 70px;
-    }
-    
-    .amount-display {
-        font-size: 40px;
-    }
-    
-    .currency-dropdown {
-        font-size: 14px;
-        padding: 8px 12px;
-    }
-    
     .page-title {
-        font-size: 20px;
+        font-size: 28px;
     }
     
-    .conversion-container,
-    .rates-container,
-    .settings-container {
-        padding: 20px;
+    .amount-input {
+        font-size: 36px;
     }
 }
