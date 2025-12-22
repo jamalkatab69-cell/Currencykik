@@ -1,24 +1,26 @@
 :root {
-    --primary-green: #4CAF50;
-    --dark-bg: #121212;
-    --card-bg: #1e1e1e;
+    --bg-color: #000000;
+    --card-bg: #1c1c1e;
+    --accent: #30d158;
+    --text-main: #ffffff;
+    --text-dim: #8e8e93;
 }
 
 body {
-    background: var(--dark-bg);
-    color: white;
-    font-family: Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     margin: 0;
+    overflow: hidden;
 }
 
-/* استخدام صور الأعلام من GitHub */
-.flag-icon {
-    width: 25px;
-    height: 18px;
-    background-size: cover;
-    display: inline-block;
+.app-container {
+    max-width: 400px;
+    margin: 0 auto;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
-/* مثال لتعيين علم السعودية من ملفاتك */
-.flag-SAR { background-image: url('../assets/flags/sar.png'); }
-.flag-USD { background-image: url('../assets/flags/usd.png'); }
+.screen { padding: 20px; flex: 1; }
+.hidden { display: none; }
