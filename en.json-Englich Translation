@@ -1,0 +1,90 @@
+{
+  "app": {
+    "name": "Currencykik",
+    "title": "Currency Converter"
+  },
+  "nav": {
+    "settings": "Settings",
+    "convert": "Convert",
+    "rates": "Rates"
+  },
+  "convert": {
+    "title": "Convert",
+    "amount": "Amount",
+    "from": "From",
+    "to": "To",
+    "swap": "Swap",
+    "result": "Result",
+    "rateAt": "at the mid-market rate"
+  },
+  "rates": {
+    "title": "Rates",
+    "favorites": "Favorites",
+    "addFavorite": "Add to Favorites",
+    "removeFavorite": "Remove from Favorites",
+    "noFavorites": "No favorite pairs",
+    "addPair": "Add Pair"
+  },
+  "settings": {
+    "title": "Settings",
+    "darkMode": "Dark mode",
+    "off": "Off",
+    "on": "On",
+    "auto": "Auto",
+    "generalSettings": "General settings",
+    "rateApp": "Rate the app",
+    "termsPrivacy": "Terms and privacy",
+    "version": "Version",
+    "language": "Language",
+    "notifications": "Notifications",
+    "about": "About"
+  },
+  "alerts": {
+    "title": "Alerts",
+    "add": "Add Alert",
+    "remove": "Remove",
+    "targetRate": "Target Rate",
+    "condition": "Condition",
+    "above": "Above",
+    "below": "Below",
+    "active": "Active",
+    "inactive": "Inactive",
+    "triggered": "Triggered"
+  },
+  "messages": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "noInternet": "No internet connection",
+    "ratesUpdated": "Rates updated",
+    "favoriteAdded": "Added to favorites",
+    "favoriteRemoved": "Removed from favorites",
+    "alertAdded": "Alert added",
+    "alertRemoved": "Alert removed"
+  },
+  "currencies": {
+    "EUR": "Euro",
+    "USD": "US Dollar",
+    "GBP": "British Pound",
+    "CHF": "Swiss Franc",
+    "CAD": "Canadian Dollar",
+    "AUD": "Australian Dollar",
+    "TRY": "Turkish Lira",
+    "CNY": "Chinese Yuan",
+    "BRL": "Brazilian Real",
+    "MXN": "Mexican Peso",
+    "ARS": "Argentine Peso",
+    "RUB": "Russian Ruble",
+    "ZAR": "South African Rand",
+    "JPY": "Japanese Yen",
+    "KRW": "South Korean Won",
+    "INR": "Indian Rupee",
+    "HKD": "Hong Kong Dollar",
+    "MYR": "Malaysian Ringgit",
+    "MAD": "Moroccan Dirham",
+    "EGP": "Egyptian Pound",
+    "TND": "Tunisian Dinar",
+    "SAR": "Saudi Riyal",
+    "QAR": "Qatari Riyal",
+    "AED": "UAE Dirham"
+  }
+}
