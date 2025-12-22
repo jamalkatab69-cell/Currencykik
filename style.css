@@ -1,123 +1,62 @@
-:root {
-    --bg-black: #000000;
-    --card-gray: #1c1c1e;
-    --accent-green: #30d158;
-    --text-secondary: #8e8e93;
-}
-
 body {
-    background-color: var(--bg-black);
+    background-color: #000;
     color: white;
-    font-family: -apple-system, system-ui, sans-serif;
-    margin: 0;
+    font-family: sans-serif;
     display: flex;
     justify-content: center;
+    padding-top: 50px;
 }
 
-.app-container {
-    width: 100%;
-    max-width: 414px;
-    height: 100vh;
-    position: relative;
+.converter-container {
+    width: 90%;
+    max-width: 400px;
+    background: #111;
     padding: 20px;
-    box-sizing: border-box;
+    border-radius: 15px;
+    text-align: center;
 }
 
-h1 { font-size: 32px; text-align: center; margin-top: 20px; }
+/* حل مشكلة تضخم الأعلام */
+.currency-flag {
+    width: 60px; /* تحديد عرض ثابت */
+    height: 60px; /* تحديد طول ثابت */
+    border-radius: 50%; /* جعلها دائرية */
+    object-fit: cover; /* لضمان عدم تمدد الصورة بشكل سيء */
+    border: 2px solid #333;
+    margin-bottom: 10px;
+}
 
-.converter-card {
-    margin-top: 40px;
+/* ترتيب العناصر في صف واحد */
+.currency-row {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-}
-
-.input-box {
-    background: var(--card-gray);
-    padding: 20px;
-    border-radius: 16px;
-    display: flex;
-    justify-content: space-between;
     align-items: center;
+    background: #1a1a1a;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 10px 0;
 }
 
-input {
-    background: transparent;
-    border: none;
-    color: white;
-    font-size: 28px;
-    font-weight: bold;
-    width: 50%;
-    outline: none;
-}
-
-.currency-selector {
+.input-group {
     display: flex;
-    align-items: center;
     gap: 10px;
+    width: 100%;
 }
 
-select {
-    background: transparent;
+input, select {
+    background: #222;
     color: white;
-    border: none;
-    font-size: 18px;
-    font-weight: bold;
-    appearance: none;
-}
-
-.flag-circle {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    object-fit: cover;
-    background: #333;
+    border: 1px solid #444;
+    padding: 8px;
+    border-radius: 5px;
+    flex: 1;
 }
 
 .swap-btn {
-    width: 40px;
-    height: 40px;
-    background: var(--card-gray);
+    background: #ff00ff;
+    border: none;
+    color: white;
+    padding: 10px;
     border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: var(--accent-green);
-    margin: -25px auto;
-    position: relative;
-    z-index: 2;
-    border: 3px solid var(--bg-black);
     cursor: pointer;
 }
-
-.info-bar {
-    text-align: center;
-    color: var(--text-secondary);
-    font-size: 14px;
-    margin-top: 15px;
-}
-
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 414px;
-    display: flex;
-    justify-content: space-around;
-    padding: 15px 0;
-    background: rgba(10, 10, 10, 0.9);
-    backdrop-filter: blur(10px);
-}
-
-.nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    color: var(--text-secondary);
-    font-size: 12px;
-}
-
-.nav-item.active { color: var(--accent-green); }
-.icon { font-size: 20px; margin-bottom: 4px; }
