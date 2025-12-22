@@ -5,84 +5,154 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>محول العملات</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
-    <!-- شريط التنقل -->
-    <nav class="navbar">
-        <button class="nav-btn active" data-page="convert">
-            <span>🔁</span> تحويل
-        </button>
-        <button class="nav-btn" data-page="rates">
-            <span>📊</span> أسعار
-        </button>
-        <button class="nav-btn" data-page="settings">
-            <span>⚙️</span> إعدادات
-        </button>
-    </nav>
-
-    <!-- الصفحة الرئيسية -->
-    <main class="container">
-        <!-- صفحة التحويل -->
+<body class="light-mode">
+    <div class="app-container">
+        <!-- الصفحة 1: التحويل -->
         <section id="convert-page" class="page active">
-            <h1>تحويل العملات</h1>
-            <div class="converter-box">
-                <div class="currency-input">
-                    <input type="number" id="amount" value="1000" min="1">
-                    <select id="from-currency">
-                        <!-- سيتم تعبئته بالجافاسكريبت -->
-                    </select>
-                </div>
-                <button class="swap-btn" id="swap-btn">⇄</button>
-                <div class="currency-input">
-                    <div id="result" class="result">0</div>
-                    <select id="to-currency">
-                        <!-- سيتم تعبئته بالجافاسكريبت -->
-                    </select>
-                </div>
-                <button class="convert-btn" id="convert-btn">تحويل</button>
-                <div id="rate-info" class="rate-info"></div>
+            <div class="app-header">
+                <h1 class="page-title"><i class="fas fa-exchange-alt"></i> تحويل العملات</h1>
             </div>
-        </section>
-
-        <!-- صفحة الأسعار -->
-        <section id="rates-page" class="page">
-            <h1>أسعار الصرف</h1>
-            <div class="search-box">
-                <input type="text" id="search-currency" placeholder="🔍 ابحث عن عملة...">
-            </div>
-            <div class="rates-list" id="rates-list">
-                <!-- سيتم تعبئته بالجافاسكريبت -->
-            </div>
-        </section>
-
-        <!-- صفحة الإعدادات -->
-        <section id="settings-page" class="page">
-            <h1>الإعدادات</h1>
-            <div class="settings-box">
-                <div class="setting-item">
-                    <h3>الوضع المظلم</h3>
-                    <div class="toggle-options">
-                        <button class="toggle-btn active" data-mode="light">فاتح</button>
-                        <button class="toggle-btn" data-mode="dark">مظلم</button>
-                        <button class="toggle-btn" data-mode="auto">تلقائي</button>
+            
+            <div class="conversion-container">
+                <!-- العملة الأصلية -->
+                <div class="currency-box from-currency">
+                    <div class="amount-display" id="from-amount">1,000</div>
+                    <div class="currency-selector">
+                        <img src="https://raw.githubusercontent.com/jamalkatabeuro-sketch/My-website/main/101-currency-usd.png" 
+                             alt="USD" class="currency-flag" id="from-flag">
+                        <select class="currency-dropdown" id="from-currency-select">
+                            <!-- سيتم تعبئته بـ JS -->
+                        </select>
+                        <span class="currency-code" id="from-code">USD</span>
                     </div>
                 </div>
-                <div class="setting-item">
-                    <h3>الإعدادات العامة</h3>
-                    <button class="setting-btn">تقييم التطبيق</button>
-                    <button class="setting-btn">الشروط والخصوصية</button>
-                    <div class="version">الإصدار 2.9.0</div>
-                </div>
-                <div class="setting-item">
-                    <h3>تحديث الأسعار</h3>
-                    <button class="refresh-btn" id="refresh-rates">
-                        🔄 تحديث الأسعار الآن
+                
+                <!-- زر التبديل -->
+                <div class="swap-container">
+                    <button class="swap-btn" id="swap-currencies">
+                        <i class="fas fa-exchange-alt"></i>
                     </button>
-                    <div id="last-update" class="update-info"></div>
+                </div>
+                
+                <!-- العملة الهدف -->
+                <div class="currency-box to-currency">
+                    <div class="amount-display" id="to-amount">1,505</div>
+                    <div class="currency-selector">
+                        <img src="https://raw.githubusercontent.com/jamalkatabeuro-sketch/My-website/main/113-currency-jpy.png" 
+                             alt="JPY" class="currency-flag" id="to-flag">
+                        <select class="currency-dropdown" id="to-currency-select">
+                            <!-- سيتم تعبئته بـ JS -->
+                        </select>
+                        <span class="currency-code" id="to-code">JPY</span>
+                    </div>
+                </div>
+                
+                <!-- معلومات سعر الصرف -->
+                <div class="rate-info" id="rate-info">
+                    <i class="fas fa-info-circle"></i>
+                    <span>1 USD = 150.5 JPY</span>
+                </div>
+                
+                <!-- زر التحويل -->
+                <button class="convert-btn" id="convert-btn">
+                    <i class="fas fa-sync-alt"></i> تحويل
+                </button>
+            </div>
+        </section>
+        
+        <!-- الصفحة 2: الأسعار -->
+        <section id="rates-page" class="page">
+            <div class="app-header">
+                <h1 class="page-title"><i class="fas fa-chart-line"></i> أسعار العملات</h1>
+            </div>
+            
+            <div class="rates-container">
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="ابحث عن عملة...">
+                    <i class="fas fa-search"></i>
+                </div>
+                
+                <div class="rates-list" id="rates-list">
+                    <!-- سيتم تعبئته بـ JS -->
                 </div>
             </div>
         </section>
-    </main>
+        
+        <!-- الصفحة 3: الإعدادات -->
+        <section id="settings-page" class="page">
+            <div class="app-header">
+                <h1 class="page-title"><i class="fas fa-cog"></i> الإعدادات</h1>
+            </div>
+            
+            <div class="settings-container">
+                <!-- الوضع المظلم -->
+                <div class="setting-section">
+                    <h3><i class="fas fa-moon"></i> الوضع المظلم</h3>
+                    <div class="toggle-options">
+                        <button class="toggle-option" data-mode="light" id="light-mode">
+                            <i class="fas fa-sun"></i> فاتح
+                        </button>
+                        <button class="toggle-option active" data-mode="dark" id="dark-mode">
+                            <i class="fas fa-moon"></i> مظلم
+                        </button>
+                        <button class="toggle-option" data-mode="auto" id="auto-mode">
+                            <i class="fas fa-adjust"></i> تلقائي
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- إعدادات عامة -->
+                <div class="setting-section">
+                    <h3><i class="fas fa-sliders-h"></i> إعدادات عامة</h3>
+                    <div class="settings-list">
+                        <button class="setting-item">
+                            <i class="fas fa-star"></i>
+                            <span>تقييم التطبيق</span>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="setting-item">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>الشروط والخصوصية</span>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <div class="version-info">
+                            <i class="fas fa-code"></i>
+                            <span>الإصدار 2.9.0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- تحديث الأسعار -->
+                <div class="setting-section">
+                    <h3><i class="fas fa-sync"></i> تحديث البيانات</h3>
+                    <button class="refresh-btn" id="refresh-rates">
+                        <i class="fas fa-redo"></i> تحديث الأسعار الآن
+                    </button>
+                    <div class="last-update" id="last-update">
+                        آخر تحديث: 2024-01-01 10:30
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- شريط التنقل السفلي -->
+        <nav class="bottom-nav">
+            <button class="nav-btn active" data-page="convert">
+                <i class="fas fa-exchange-alt"></i>
+                <span>تحويل</span>
+            </button>
+            <button class="nav-btn" data-page="rates">
+                <i class="fas fa-chart-line"></i>
+                <span>أسعار</span>
+            </button>
+            <button class="nav-btn" data-page="settings">
+                <i class="fas fa-cog"></i>
+                <span>إعدادات</span>
+            </button>
+        </nav>
+    </div>
 
     <script src="app.js" type="module"></script>
 </body>
