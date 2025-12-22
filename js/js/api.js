@@ -1,16 +1,22 @@
-const API_KEY = 'b83fce53976843bbb59336c03f9a6a30';
-const BASE_URL = 'https://api.twelvedata.com';
+import { CONFIG } from './config.js';
 
-export const CurrencyAPI = {
-    // جلب الأسعار لجميع العملات في طلب واحد (Batch)
-    async getAllRates(symbols) {
-        const query = symbols.join('/USD,') + '/USD';
+export const API = {
+    async fetchBatchRates() {
+        const symbols = Object.keys(CONFIG.CURRENCIES).filter(c => c !== 'USD').map(c => `${c}/USD`).join(',');
+        const url = `${CONFIG.BASE_URL}/price?symbol=${symbols}&apikey=${CONFIG.API_KEY}`;
+        
         try {
-            const response = await fetch(`${BASE_URL}/price?symbol=${query}&apikey=${API_KEY}`);
-            if (!response.ok) throw new Error('Network response was not ok');
-            return await response.json();
+            const response = await fetch(url);
+            const data = await response.json();
+            const rates = { "USD": 1 };
+            
+            for (const pair in data) {
+                const symbol = pair.split('/')[0];
+                rates[symbol] = parseFloat(data[pair].price);
+            }
+            return rates;
         } catch (error) {
-            console.error("Fetch Error:", error);
+            console.error("API Fetch Error:", error);
             return null;
         }
     }
