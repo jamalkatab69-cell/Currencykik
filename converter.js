@@ -1,139 +1,117 @@
-// تهيئة صفحة الأسعار
-function initializeRates() {
-    const searchInput = document.getElementById('search-currency');
-    const ratesList = document.getElementById('rates-list');
-    
-    // البحث
-    searchInput.addEventListener('input', function() {
-        updateRatesDisplay(this.value.toLowerCase());
-    });
-    
-    // تحديث قائمة الأسعار
-    updateRatesDisplay();
-}
+// === converter.js ===
 
-// تحديث عرض الأسعار
-async function updateRatesDisplay(searchTerm = '') {
-    const ratesList = document.getElementById('rates-list');
-    ratesList.innerHTML = '<div class="loading">جاري تحميل الأسعار...</div>';
-    
-    try {
-        const baseCurrency = appSettings.baseCurrency || 'USD';
-        const rates = await getAllExchangeRates(baseCurrency);
-        
-        if (rates && Object.keys(rates).length > 0) {
-            displayRatesList(rates, searchTerm);
-            
-            // تحديث وقت التحديث
-            appSettings.lastUpdate = new Date().toISOString();
-            localStorage.setItem('currencyAppSettings', JSON.stringify(appSettings));
-            updateLastUpdateDisplay();
-        } else {
-            ratesList.innerHTML = '<div class="error">لا يمكن جلب الأسعار حالياً</div>';
-        }
-    } catch (error) {
-        console.error('خطأ في جلب الأسعار:', error);
-        ratesList.innerHTML = '<div class="error">حدث خطأ في الاتصال</div>';
-    }
-}
+// هذا الملف يمكن دمجه مع app.js أو يكون منفصلاً
+// إليك الدوال الإضافية للتحويل
 
-// جلب جميع أسعار الصرف
-async function getAllExchangeRates(baseCurrency) {
-    const apiKey = 'b83fce53976843bbb59336c03f9a6a30';
-    const rates = {};
+// تحديث المبلغ يدوياً
+function setupAmountInput() {
+    const amountDisplay = document.getElementById('from-amount');
     
-    // جلب سعر أساسي لكل عملة
-    const currencyCodes = currencies.map(c => c.code).filter(code => code !== baseCurrency);
+    // جعل المبلغ قابلاً للتعديل بالنقر
+    amountDisplay.style.cursor = 'pointer';
+    amountDisplay.title = 'انقر لتعديل المبلغ';
     
-    // جلب دفعات صغيرة لتجنب حدود API
-    const batchSize = 5;
-    for (let i = 0; i < currencyCodes.length; i += batchSize) {
-        const batch = currencyCodes.slice(i, i + batchSize);
+    amountDisplay.addEventListener('click', function() {
+        const currentAmount = this.textContent.replace(/,/g, '');
+        const newAmount = prompt('أدخل المبلغ الجديد:', currentAmount);
         
-        await Promise.all(batch.map(async (currency) => {
-            const url = `https://api.twelvedata.com/exchange_rate?symbol=${baseCurrency}/${currency}&apikey=${apiKey}`;
-            
-            try {
-                const response = await fetch(url);
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.rate) {
-                        rates[currency] = {
-                            rate: parseFloat(data.rate),
-                            name: currencies.find(c => c.code === currency)?.name || currency
-                        };
-                    }
-                }
-            } catch (error) {
-                console.error(`خطأ في جلب سعر ${currency}:`, error);
+        if (newAmount !== null && newAmount !== '' && !isNaN(newAmount)) {
+            const numAmount = parseFloat(newAmount);
+            if (numAmount > 0) {
+                this.textContent = formatNumber(numAmount);
+                performConversion();
+            } else {
+                alert('الرجاء إدخال مبلغ صحيح أكبر من الصفر');
             }
-        }));
-        
-        // تأخير بسيط بين الدفعات
-        await new Promise(resolve => setTimeout(resolve, 100));
-    }
-    
-    return rates;
+        }
+    });
 }
 
-// عرض قائمة الأسعار
-function displayRatesList(rates, searchTerm = '') {
-    const ratesList = document.getElementById('rates-list');
-    ratesList.innerHTML = '';
+// حساب المبلغ مع الرسوم (إن وجدت)
+function calculateWithFees(amount, rate, feePercentage = 0) {
+    if (feePercentage <= 0) return amount * rate;
     
-    const filteredCurrencies = currencies.filter(currency => {
-        if (currency.code === appSettings.baseCurrency) return false;
-        
-        if (searchTerm) {
-            return currency.name.toLowerCase().includes(searchTerm) ||
-                   currency.code.toLowerCase().includes(searchTerm);
-        }
-        return true;
-    });
+    const fee = amount * (feePercentage / 100);
+    const total = (amount - fee) * rate;
     
-    if (filteredCurrencies.length === 0) {
-        ratesList.innerHTML = '<div class="error">لا توجد عملات مطابقة للبحث</div>';
-        return;
+    return {
+        amount: total,
+        fee: fee,
+        feePercentage: feePercentage,
+        rate: rate
+    };
+}
+
+// عرض التاريخ والوقت
+function getCurrentDateTime() {
+    const now = new Date();
+    const options = {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    };
+    
+    return now.toLocaleDateString('ar-SA', options);
+}
+
+// حفظ سجل التحويلات
+function saveConversionHistory(fromCurrency, toCurrency, amount, result, rate) {
+    if (!localStorage.getItem('conversionHistory')) {
+        localStorage.setItem('conversionHistory', JSON.stringify([]));
     }
     
-    filteredCurrencies.forEach(currency => {
-        const rateData = rates[currency.code];
-        
-        const rateItem = document.createElement('div');
-        rateItem.className = 'rate-item';
-        
-        const currencyInfo = document.createElement('div');
-        currencyInfo.className = 'currency-info';
-        
-        const iconImg = document.createElement('img');
-        iconImg.className = 'currency-icon';
-        iconImg.src = `${IMAGE_BASE_URL}${currency.icon || currency.flag}`;
-        iconImg.alt = currency.code;
-        iconImg.onerror = function() {
-            this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiMyZDhjZmYiLz4KPHBhdGggZD0iTTIwIDEwVjMwTTMwIDIwSDEwIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiLz4KPC9zdmc+';
-        };
-        
-        const textInfo = document.createElement('div');
-        textInfo.innerHTML = `
-            <div class="currency-name">${currency.name}</div>
-            <div class="currency-code">${currency.code}</div>
-        `;
-        
-        currencyInfo.appendChild(iconImg);
-        currencyInfo.appendChild(textInfo);
-        
-        const currencyValue = document.createElement('div');
-        currencyValue.className = 'currency-value';
-        
-        if (rateData) {
-            currencyValue.textContent = rateData.rate.toFixed(4);
-        } else {
-            currencyValue.textContent = 'N/A';
-            currencyValue.style.color = '#999';
-        }
-        
-        rateItem.appendChild(currencyInfo);
-        rateItem.appendChild(currencyValue);
-        ratesList.appendChild(rateItem);
-    });
+    const history = JSON.parse(localStorage.getItem('conversionHistory'));
+    const conversion = {
+        id: Date.now(),
+        date: new Date().toISOString(),
+        from: fromCurrency,
+        to: toCurrency,
+        amount: amount,
+        result: result,
+        rate: rate,
+        timestamp: new Date().getTime()
+    };
+    
+    history.unshift(conversion); // إضافة في البداية
+    
+    // حفظ فقط آخر 50 عملية
+    if (history.length > 50) {
+        history.pop();
+    }
+    
+    localStorage.setItem('conversionHistory', JSON.stringify(history));
 }
+
+// جلب سجل التحويلات
+function getConversionHistory() {
+    const history = localStorage.getItem('conversionHistory');
+    return history ? JSON.parse(history) : [];
+}
+
+// تحويل العملة إلى رمز
+function getCurrencySymbol(code) {
+    const symbols = {
+        'USD': '$',
+        'EUR': '€',
+        'GBP': '£',
+        'JPY': '¥',
+        'CNY': '¥',
+        'KRW': '₩',
+        'INR': '₹',
+        'RUB': '₽',
+        'TRY': '₺',
+        'BRL': 'R$',
+        'MXN': '$'
+    };
+    
+    return symbols[code] || code;
+}
+
+// تهيئة الأحداث عند التحميل
+document.addEventListener('DOMContentLoaded', function() {
+    setupAmountInput();
+});
