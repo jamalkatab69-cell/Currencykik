@@ -1,23 +1,19 @@
-import { CONFIG } from './config.js';
+// api.js
+import { CONFIG } from "./config.js";
 
-export const API = {
-    async fetchBatchRates() {
-        const symbols = Object.keys(CONFIG.CURRENCIES).filter(c => c !== 'USD').map(c => `${c}/USD`).join(',');
-        const url = `${CONFIG.BASE_URL}/price?symbol=${symbols}&apikey=${CONFIG.API_KEY}`;
-        
-        try {
-            const response = await fetch(url);
-            const data = await response.json();
-            const rates = { "USD": 1 };
-            
-            for (const pair in data) {
-                const symbol = pair.split('/')[0];
-                rates[symbol] = parseFloat(data[pair].price);
-            }
-            return rates;
-        } catch (error) {
-            console.error("API Fetch Error:", error);
-            return null;
-        }
-    }
-};
+export async function fetchRates(symbols) {
+  const url = `https://api.twelvedata.com/exchange_rate?symbol=${encodeURIComponent(symbols.join(","))}&apikey=${CONFIG.API_KEY}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("فشل الاتصال بالخادم");
+  return await res.json();
+}
+
+export async function convertCurrency(from, to, amount) {
+  const url = `https://api.twelvedata.com/exchange_rate?symbol=${from}/${to}&apikey=${CONFIG.API_KEY}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("فشل الاتصال بالخادم");
+  const data = await res.json();
+  const rate = parseFloat(data?.rate);
+  if (!rate || isNaN(rate)) throw new Error("معدل غير متاح");
+  return amount * rate;
+}
