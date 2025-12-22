@@ -1,136 +1,201 @@
-// هذه الدوال مضافة لملف app.js أو rates.js
-// وموجودة بالفعل في الكود أعلاه
+// === settings.js ===
 
-// تثبيت التطبيق كـ PWA (إضافة اختيارية)
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch(error => {
-            console.log('Service Worker registration failed:', error);
-        });
+// بيانات الاتصال
+const contactInfo = {
+    email: "support@currencyapp.com",
+    website: "https://currencyapp.com",
+    version: "2.9.0"
+};
+
+// إعدادات متقدمة
+const advancedSettings = {
+    autoRefresh: true,
+    refreshInterval: 300000, // 5 دقائق
+    defaultAmount: 1000,
+    defaultFrom: 'USD',
+    defaultTo: 'EUR',
+    showFlags: true,
+    animations: true
+};
+
+// تحميل الإعدادات المتقدمة
+function loadAdvancedSettings() {
+    const saved = localStorage.getItem('advancedSettings');
+    if (saved) {
+        Object.assign(advancedSettings, JSON.parse(saved));
+    }
+}
+
+// حفظ الإعدادات المتقدمة
+function saveAdvancedSettings() {
+    localStorage.setItem('advancedSettings', JSON.stringify(advancedSettings));
+}
+
+// إعداد الوضع المظلم التلقائي
+function setupAutoDarkMode() {
+    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    
+    darkModeMediaQuery.addEventListener('change', (e) => {
+        if (appSettings.darkMode === 'auto') {
+            applyDarkMode('auto');
+        }
     });
 }
 
-// دعم التثبيت على الشاشة الرئيسية
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
+// إعادة تعيين الإعدادات
+function resetSettings() {
+    if (confirm('هل أنت متأكد من إعادة تعيين جميع الإعدادات؟')) {
+        localStorage.removeItem('currencyAppSettings');
+        localStorage.removeItem('advancedSettings');
+        localStorage.removeItem('conversionHistory');
+        
+        // إعادة تحميل الصفحة
+        location.reload();
+    }
+}
+
+// نسخ احتياطي للإعدادات
+function backupSettings() {
+    const backup = {
+        appSettings: appSettings,
+        advancedSettings: advancedSettings,
+        timestamp: new Date().toISOString()
+    };
     
-    // يمكن إضافة زر تثبيت
-    const installBtn = document.createElement('button');
-    installBtn.textContent = '📱 تثبيت التطبيق';
-    installBtn.className = 'install-btn';
-    installBtn.style.cssText = `
-        position: fixed;
-        bottom: 80px;
-        right: 20px;
-        background: #28a745;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 20px;
-        z-index: 1000;
-        cursor: pointer;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    `;
+    const dataStr = JSON.stringify(backup, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
     
-    installBtn.onclick = async () => {
-        if (deferredPrompt) {
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            if (outcome === 'accepted') {
-                installBtn.remove();
+    const exportFileDefaultName = `إعدادات_محول_العملات_${new Date().toISOString().split('T')[0]}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+}
+
+// استعادة الإعدادات من ملف
+function restoreSettings(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const backup = JSON.parse(e.target.result);
+            
+            if (confirm('هل تريد استعادة الإعدادات المحفوظة؟')) {
+                if (backup.appSettings) {
+                    localStorage.setItem('currencyAppSettings', JSON.stringify(backup.appSettings));
+                }
+                
+                if (backup.advancedSettings) {
+                    localStorage.setItem('advancedSettings', JSON.stringify(backup.advancedSettings));
+                }
+                
+                alert('تم استعادة الإعدادات بنجاح! سيتم إعادة تحميل الصفحة.');
+                location.reload();
             }
-            deferredPrompt = null;
+        } catch (error) {
+            alert('خطأ في قراءة ملف النسخ الاحتياطي: ' + error.message);
         }
     };
     
-    document.body.appendChild(installBtn);
-    
-    // إخفاء الزر بعد 10 ثواني
-    setTimeout(() => installBtn.remove(), 10000);
-});
-
-// حفظ البيانات محلياً للعمل دون اتصال
-function saveRatesForOffline(rates) {
-    if ('localStorage' in window) {
-        localStorage.setItem('cachedRates', JSON.stringify({
-            rates: rates,
-            timestamp: new Date().toISOString()
-        }));
-    }
+    reader.readAsText(file);
 }
 
-// جلب البيانات المخزنة محلياً
-function getCachedRates() {
-    const cached = localStorage.getItem('cachedRates');
-    if (cached) {
-        const data = JSON.parse(cached);
-        const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-        
-        if (data.timestamp > oneHourAgo) {
-            return data.rates;
-        }
-    }
-    return null;
-}
-
-// تحديث performConversion لدعم العمل دون اتصال
-async function performConversion() {
-    const amount = parseFloat(document.getElementById('amount').value) || 0;
-    const fromCurrency = document.getElementById('from-currency').value;
-    const toCurrency = document.getElementById('to-currency').value;
-    const resultElement = document.getElementById('result');
-    const rateInfoElement = document.getElementById('rate-info');
+// إضافة قسم الإعدادات المتقدمة
+function addAdvancedSettingsSection() {
+    const settingsContainer = document.querySelector('.settings-container');
     
-    if (amount <= 0) {
-        resultElement.textContent = '0';
-        rateInfoElement.textContent = 'أدخل مبلغاً صحيحاً';
-        return;
-    }
+    const advancedSection = document.createElement('div');
+    advancedSection.className = 'setting-section';
+    advancedSection.innerHTML = `
+        <h3><i class="fas fa-sliders-h"></i> إعدادات متقدمة</h3>
+        <div class="advanced-settings">
+            <div class="setting-item">
+                <label>
+                    <input type="checkbox" id="auto-refresh" ${advancedSettings.autoRefresh ? 'checked' : ''}>
+                    <span>التحديث التلقائي للأسعار</span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <label>
+                    <input type="checkbox" id="show-flags" ${advancedSettings.showFlags ? 'checked' : ''}>
+                    <span>إظهار أعلام العملات</span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <label>
+                    <input type="checkbox" id="animations" ${advancedSettings.animations ? 'checked' : ''}>
+                    <span>الحركات والانتقالات</span>
+                </label>
+            </div>
+            <div class="setting-buttons">
+                <button class="setting-btn secondary" id="backup-btn">
+                    <i class="fas fa-download"></i> نسخ احتياطي
+                </button>
+                <button class="setting-btn secondary" id="reset-btn">
+                    <i class="fas fa-redo"></i> إعادة تعيين
+                </button>
+            </div>
+            <div class="restore-section">
+                <label for="restore-file" class="restore-btn">
+                    <i class="fas fa-upload"></i> استعادة من ملف
+                </label>
+                <input type="file" id="restore-file" accept=".json" style="display: none;">
+            </div>
+        </div>
+    `;
     
-    if (fromCurrency === toCurrency) {
-        resultElement.textContent = amount.toLocaleString();
-        rateInfoElement.textContent = 'نفس العملة';
-        return;
-    }
+    settingsContainer.insertBefore(advancedSection, settingsContainer.querySelector('.setting-section:last-child'));
     
-    try {
-        resultElement.textContent = '...';
-        rateInfoElement.textContent = 'جاري التحويل...';
-        
-        // محاولة جلب البيانات من API أولاً
-        const rate = await getExchangeRate(fromCurrency, toCurrency);
-        
-        if (rate) {
-            showConversionResult(amount, rate, fromCurrency, toCurrency);
-        } else {
-            // المحاولة من البيانات المخزنة محلياً
-            const cachedRates = getCachedRates();
-            if (cachedRates && cachedRates[toCurrency]) {
-                const cachedRate = cachedRates[toCurrency].rate;
-                showConversionResult(amount, cachedRate, fromCurrency, toCurrency);
-                rateInfoElement.textContent += ' (بيانات مخزنة)';
-            } else {
-                throw new Error('لا يمكن الحصول على سعر الصرف');
-            }
-        }
-    } catch (error) {
-        console.error('خطأ في التحويل:', error);
-        resultElement.textContent = 'خطأ';
-        rateInfoElement.textContent = 'حدث خطأ. تحقق من الاتصال بالإنترنت';
-    }
-}
-
-function showConversionResult(amount, rate, fromCurrency, toCurrency) {
-    const resultElement = document.getElementById('result');
-    const rateInfoElement = document.getElementById('rate-info');
-    
-    const convertedAmount = amount * rate;
-    resultElement.textContent = convertedAmount.toLocaleString('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
+    // إضافة الأحداث
+    document.getElementById('auto-refresh').addEventListener('change', function() {
+        advancedSettings.autoRefresh = this.checked;
+        saveAdvancedSettings();
     });
     
-    rateInfoElement.textContent = `1 ${fromCurrency} = ${rate.toFixed(4)} ${toCurrency}`;
+    document.getElementById('show-flags').addEventListener('change', function() {
+        advancedSettings.showFlags = this.checked;
+        saveAdvancedSettings();
+        toggleFlagsVisibility(this.checked);
+    });
+    
+    document.getElementById('animations').addEventListener('change', function() {
+        advancedSettings.animations = this.checked;
+        saveAdvancedSettings();
+        toggleAnimations(this.checked);
+    });
+    
+    document.getElementById('backup-btn').addEventListener('click', backupSettings);
+    document.getElementById('reset-btn').addEventListener('click', resetSettings);
+    document.getElementById('restore-file').addEventListener('change', restoreSettings);
 }
+
+// تبديل رؤية الأعلام
+function toggleFlagsVisibility(show) {
+    const flags = document.querySelectorAll('.currency-flag, .rate-flag');
+    flags.forEach(flag => {
+        flag.style.display = show ? 'block' : 'none';
+    });
+}
+
+// تبديل الحركات
+function toggleAnimations(enabled) {
+    document.body.style.transition = enabled ? 'all 0.3s ease' : 'none';
+    document.querySelectorAll('*').forEach(el => {
+        el.style.transition = enabled ? 'all 0.3s ease' : 'none';
+    });
+}
+
+// تهيئة الإعدادات المتقدمة عند التحميل
+document.addEventListener('DOMContentLoaded', function() {
+    loadAdvancedSettings();
+    setupAutoDarkMode();
+    
+    // إضافة الإعدادات المتقدمة بعد تأخير بسيط
+    setTimeout(addAdvancedSettingsSection, 1000);
+    
+    // تحديث إصدار التطبيق
+    document.querySelector('.version-info span').textContent = `الإصدار ${contactInfo.version}`;
+});
