@@ -7,13 +7,11 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- رأس بسيط -->
   <header class="app-header">
     <h1>محول العملات</h1>
     <div id="last-update" class="subtext">جارِ التحديث...</div>
   </header>
 
-  <!-- الشاشة: الأسعار -->
   <main id="screen-rates" class="screen active">
     <div class="toolbar">
       <button id="btn-refresh" class="btn primary">تحديث الآن</button>
@@ -22,14 +20,12 @@
     <div id="rates-error" class="error hidden"></div>
   </main>
 
-  <!-- الشاشة: التحويل -->
   <main id="screen-convert" class="screen">
     <div class="convert-card">
       <div class="row">
         <label>المبلغ</label>
         <input type="number" id="amount-input" placeholder="أدخل المبلغ" min="0" step="0.01" />
       </div>
-
       <div class="row currency-row">
         <div class="col">
           <label>من</label>
@@ -47,27 +43,24 @@
           </div>
         </div>
       </div>
-
       <div class="row actions">
         <button id="btn-convert" class="btn primary">تحويل</button>
       </div>
-
       <div id="convert-result" class="result"></div>
       <div id="convert-hint" class="subtext">يتم التحويل حسب سعر السوق المتوسط</div>
       <div id="convert-error" class="error hidden"></div>
     </div>
   </main>
 
-  <!-- الشاشة: الإعدادات -->
   <main id="screen-settings" class="screen">
     <section class="settings-card">
-      <h2>الوضع <div class="segmented">
+      <h2>الوضع الداكن</h2>
+      <div class="segmented">
         <button data-theme="off" class="segment">إيقاف</button>
         <button data-theme="on" class="segment">تشغيل</button>
         <button data-theme="auto" class="segment active">تلقائي</button>
       </div>
     </section>
-
     <section class="settings-card">
       <h2>إعدادات عامة</h2>
       <div class="settings-list">
@@ -84,13 +77,13 @@
     </section>
   </main>
 
-  <!-- شريط التنقل السفلي -->
   <nav class="bottom-nav">
     <button class="nav-btn active" data-target="rates">الأسعار</button>
     <button class="nav-btn" data-target="convert">تحويل</button>
     <button class="nav-btn" data-target="settings">الإعدادات</button>
   </nav>
 
-  <script src="script.js"></script>
+  <!-- تحميل الموديولات -->
+  <script type="module" src="app.js"></script>
 </body>
 </html>
