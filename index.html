@@ -3,43 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>محول العملات الاحترافي</title>
+    <title>Currency Converter Pro</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="dark-mode">
+<body>
     <div class="app-container">
-        <header>
-            <h1>Convert</h1>
-        </header>
+        <main id="converter-screen" class="screen">
+            <header>
+                <h1>Convert</h1>
+            </header>
 
-        <main class="converter-box">
-            <div class="input-group">
-                <input type="number" id="amount" value="1000" placeholder="المبلغ">
-                <select id="from-currency">
-                    </select>
-                <img id="from-flag" src="" class="flag">
-            </div>
+            <div class="converter-card">
+                <div class="input-box">
+                    <input type="number" id="amount" value="1000">
+                    <div class="currency-selector">
+                        <select id="from-currency"></select>
+                        <img id="from-flag" src="" class="flag-circle">
+                    </div>
+                </div>
 
-            <div class="swap-icon" id="swap">⇅</div>
+                <div class="swap-divider">
+                    <div class="swap-btn" id="swap-currencies">⇅</div>
+                </div>
 
-            <div class="input-group">
-                <input type="text" id="result" readonly placeholder="النتيجة">
-                <select id="to-currency">
-                    </select>
-                <img id="to-flag" src="" class="flag">
-            </div>
+                <div class="input-box">
+                    <input type="text" id="result" readonly>
+                    <div class="currency-selector">
+                        <select id="to-currency"></select>
+                        <img id="to-flag" src="" class="flag-circle">
+                    </div>
+                </div>
 
-            <div class="rate-info">
-                <p id="exchange-info">جاري تحميل الأسعار...</p>
+                <div class="info-bar">
+                    <p id="exchange-info">جاري جلب الأسعار...</p>
+                </div>
             </div>
         </main>
 
         <nav class="bottom-nav">
-            <div class="nav-item"><span>⚙</span> Settings</div>
-            <div class="nav-item active"><span>↔</span> Convert</div>
-            <div class="nav-item"><span>📈</span> Rates</div>
+            <div class="nav-item" data-screen="settings">
+                <span class="icon">⚙</span>
+                <span>Settings</span>
+            </div>
+            <div class="nav-item active" data-screen="converter">
+                <span class="icon">↔</span>
+                <span>Convert</span>
+            </div>
+            <div class="nav-item" data-screen="rates">
+                <span class="icon">📈</span>
+                <span>Rates</span>
+            </div>
         </nav>
     </div>
-    <script src="script.js"></script>
+
+    <script type="module" src="app.js"></script>
 </body>
 </html>
