@@ -3,87 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Currency Pro Max</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/screens.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>محول العملات الاحترافي</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body class="dark-mode">
-    <div id="app">
-        <section id="rates-screen" class="screen active">
-            <div class="header">
-                <button id="add-currency" class="plus-btn">+</button>
-                <h2>الأسعار</h2>
+    <div class="app-container">
+        <header>
+            <h1>Convert</h1>
+        </header>
+
+        <main class="converter-box">
+            <div class="input-group">
+                <input type="number" id="amount" value="1000" placeholder="المبلغ">
+                <select id="from-currency">
+                    </select>
+                <img id="from-flag" src="" class="flag">
             </div>
-            <div class="section-label">المفضلة</div>
-            <div id="rates-container">
-                </div>
-        </section>
 
-        <section id="convert-screen" class="screen">
-            <div class="header">
-                <h2>المحول</h2>
+            <div class="swap-icon" id="swap">⇅</div>
+
+            <div class="input-group">
+                <input type="text" id="result" readonly placeholder="النتيجة">
+                <select id="to-currency">
+                    </select>
+                <img id="to-flag" src="" class="flag">
             </div>
-            
-            <div class="converter-wrapper">
-                <div class="input-card">
-                    <input type="number" id="from-value" value="1000" oninput="performConversion()">
-                    <div class="currency-picker">
-                        <select id="from-select" onchange="updateConvertIcons()"></select>
-                        <img id="from-icon" src="assets/flags/101-currency-usd.png" alt="flag">
-                    </div>
-                </div>
 
-                <div class="swap-container">
-                    <button id="swap-btn" onclick="swapCurrencies()">
-                        <i class="fas fa-exchange-alt fa-rotate-90"></i>
-                    </button>
-                </div>
-
-                <div class="input-card">
-                    <input type="number" id="to-value" readonly placeholder="0.00">
-                    <div class="currency-picker">
-                        <select id="to-select" onchange="updateConvertIcons()"></select>
-                        <img id="to-icon" src="assets/flags/113-currency-jpy.png" alt="flag">
-                    </div>
-                </div>
-
-                <div class="live-info-bar">
-                    <p id="rate-details">جاري جلب بيانات السوق...</p>
-                </div>
+            <div class="rate-info">
+                <p id="exchange-info">جاري تحميل الأسعار...</p>
             </div>
-        </section>
-
-        <section id="settings-screen" class="screen">
-            <div class="header"><h2>الإعدادات</h2></div>
-            <div class="settings-list">
-                <div class="setting-item">
-                    <span>الوضع الليلي</span>
-                    <div class="toggle-btn">مفعل</div>
-                </div>
-                <hr>
-                <div class="setting-item">تقييم التطبيق <span>⭐</span></div>
-                <div class="setting-item">الإصدار 2.9.0</div>
-            </div>
-        </section>
+        </main>
 
         <nav class="bottom-nav">
-            <div class="nav-item" onclick="showScreen('settings-screen', this)">
-                <i class="fas fa-cog"></i><span>الإعدادات</span>
-            </div>
-            <div class="nav-item" onclick="showScreen('convert-screen', this)">
-                <i class="fas fa-exchange-alt"></i><span>المحول</span>
-            </div>
-            <div class="nav-item active" onclick="showScreen('rates-screen', this)">
-                <i class="fas fa-chart-line"></i><span>الأسعار</span>
-            </div>
+            <div class="nav-item"><span>⚙</span> Settings</div>
+            <div class="nav-item active"><span>↔</span> Convert</div>
+            <div class="nav-item"><span>📈</span> Rates</div>
         </nav>
     </div>
-
-    <script src="js/store.js"></script>
-    <script src="js/api.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/app.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
