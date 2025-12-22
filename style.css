@@ -1,62 +1,124 @@
-body {
-    background-color: #000;
-    color: white;
-    font-family: sans-serif;
-    display: flex;
-    justify-content: center;
-    padding-top: 50px;
+:root {
+  --bg: #0f1115;
+  --card: #161a22;
+  --text: #ffffff;
+  --muted: #9aa4b2;
+  --primary: #2ecc71;
+  --danger: #ff5252;
+  --border: #232a36;
 }
 
-.converter-container {
-    width: 90%;
-    max-width: 400px;
-    background: #111;
-    padding: 20px;
-    border-radius: 15px;
-    text-align: center;
+html, body {
+  margin: 0; padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
 }
 
-/* حل مشكلة تضخم الأعلام */
-.currency-flag {
-    width: 60px; /* تحديد عرض ثابت */
-    height: 60px; /* تحديد طول ثابت */
-    border-radius: 50%; /* جعلها دائرية */
-    object-fit: cover; /* لضمان عدم تمدد الصورة بشكل سيء */
-    border: 2px solid #333;
-    margin-bottom: 10px;
+.app-header {
+  padding: 16px 16px 8px;
+  border-bottom: 1px solid var(--border);
+}
+.app-header h1 {
+  margin: 0; font-size: 20px;
+}
+.subtext {
+  color: var(--muted);
+  font-size: 13px;
 }
 
-/* ترتيب العناصر في صف واحد */
-.currency-row {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: #1a1a1a;
-    padding: 15px;
-    border-radius: 10px;
-    margin: 10px 0;
+.screen {
+  display: none;
+  padding: 16px;
+}
+.screen.active { display: block; }
+
+.bottom-nav {
+  position: fixed; left: 0; right: 0; bottom: 0;
+  background: #0b0e12;
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: space-around; padding: 6px 4px;
+}
+.nav-btn {
+  background: transparent; border: none; color: var(--muted);
+  padding: 8px 12px; font-size: 14px; border-radius: 8px;
+}
+.nav-btn.active { color: var(--text); background: var(--card); }
+
+.card-list { display: grid; gap: 10px; }
+.rate-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px;
+  display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center;
+}
+.rate-left { display: flex; align-items: center; gap: 8px; }
+.rate-title { font-weight: 600; }
+.rate-sub { color: var(--muted); font-size: 12px; }
+.rate-value { font-size: 16px; font-weight: 700; }
+.rate-trend.up { color: #50fa7b; }
+.rate-trend.down { color: #ff5555; }
+.rate-icon {
+  width: 32px; height: 32px; border-radius: 8px; object-fit: cover;
 }
 
-.input-group {
-    display: flex;
-    gap: 10px;
-    width: 100%;
+.toolbar { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+
+.btn {
+  background: var(--card); color: var(--text);
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 10px 14px; font-weight: 600; cursor: pointer;
+}
+.btn.primary { background: var(--primary); border: none; color: #072814; }
+.btn.icon { padding: 8px 10px; min-width: 44px; }
+
+.error { color: var(--danger); background: #201316; border: 1px solid #392026; padding: 10px; border-radius: 8px; }
+.hidden { display: none; }
+
+.convert-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  padding: 14px; display: grid; gap: 12px;
 }
 
-input, select {
-    background: #222;
-    color: white;
-    border: 1px solid #444;
-    padding: 8px;
-    border-radius: 5px;
-    flex: 1;
+.row { display: grid; gap: 6px; }
+.currency-row { grid-template-columns: 1fr auto 1fr; align-items: end; gap: 10px; }
+.currency-select { display: flex; align-items: center; gap: 8px; background: #12161f; border: 1px solid var(--border); border-radius: 10px; padding: 6px 8px; }
+.currency-icon { width: 28px; height: 28px; border-radius: 6px; }
+select, input[type="number"] {
+  width: 100%; padding: 10px; border-radius: 8px;
+  border: 1px solid var(--border); background: #12161f; color: var(--text);
+  outline: none;
 }
 
-.swap-btn {
-    background: #ff00ff;
-    border: none;
-    color: white;
-    padding: 10px;
-    border-radius: 50%;
-    cursor: pointer;
+.actions { display: flex; gap: 10px; }
+.result {
+  font-size: 18px; font-weight: 700; background: #12161f;
+  padding: 10px; border-radius: 10px; border: 1px solid var(--border);
+}
+
+/* الإعدادات */
+.settings-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 12px;
+}
+.segmented { display: inline-flex; background: #12161f; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.segment {
+  background: transparent; color: var(--text); border: none; padding: 8px 12px; cursor: pointer;
+}
+.segment.active { background: var(--primary); color: #072814; }
+
+.settings-list { display: grid; gap: 8px; margin-top: 8px; }
+.settings-item {
+  display: flex; justify-content: space-between; align-items: center;
+  background: #12161f; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); text-decoration: none;
+}
+.version { color: var(--muted); font-size: 12px; margin-top: 8px; }
+
+/* ثيم فاتح (لو تم اختياره) */
+.light {
+  --bg: #f6f8fb;
+  --card: #ffffff;
+  --text: #111827;
+  --muted: #475569;
+  --primary: #2ecc71;
+  --danger: #b91c1c;
+  --border: #e5e7eb;
 }
