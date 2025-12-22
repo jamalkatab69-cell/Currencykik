@@ -1,365 +1,595 @@
+/* إعادة التعيين */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: 'Segoe UI', 'Cairo', sans-serif;
 }
 
 :root {
-    --primary: #2d8cff;
-    --bg-light: #ffffff;
-    --text-light: #333333;
-    --card-light: #f8f9fa;
-    --bg-dark: #1a1a1a;
-    --text-dark: #ffffff;
-    --card-dark: #2d2d2d;
+    /* الألوان للوضع الفاتح */
+    --bg-color: #f5f5f7;
+    --card-color: #ffffff;
+    --text-color: #1d1d1f;
+    --border-color: #d2d2d7;
+    --primary-color: #007aff;
+    --secondary-color: #5856d6;
+    --success-color: #34c759;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
+/* الوضع المظلم */
+body.dark-mode {
+    --bg-color: #000000;
+    --card-color: #1d1d1f;
+    --text-color: #f5f5f7;
+    --border-color: #424245;
+    --primary-color: #0a84ff;
+    --secondary-color: #5e5ce6;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* تصميم عام */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--bg-light);
-    color: var(--text-light);
+    background-color: var(--bg-color);
+    color: var(--text-color);
     transition: all 0.3s ease;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.app-container {
     max-width: 500px;
     margin: 0 auto;
-    padding: 20px;
     min-height: 100vh;
-}
-
-body.dark-mode {
-    background-color: var(--bg-dark);
-    color: var(--text-dark);
-}
-
-/* شريط التنقل */
-.navbar {
-    display: flex;
-    justify-content: space-around;
-    background: var(--card-light);
-    border-radius: 15px;
-    padding: 10px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-body.dark-mode .navbar {
-    background: var(--card-dark);
-}
-
-.nav-btn {
-    flex: 1;
-    padding: 12px;
-    border: none;
-    background: transparent;
-    color: inherit;
-    font-size: 14px;
-    border-radius: 10px;
-    cursor: pointer;
     display: flex;
     flex-direction: column;
+    padding: 20px;
+    position: relative;
+    padding-bottom: 80px;
+}
+
+/* العنوان */
+.app-header {
+    padding: 20px 0;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 30px;
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--primary-color);
+    display: flex;
     align-items: center;
-    gap: 5px;
-    transition: all 0.3s ease;
-}
-
-.nav-btn.active {
-    background: var(--primary);
-    color: white;
-}
-
-.nav-btn span {
-    font-size: 18px;
+    justify-content: center;
+    gap: 10px;
 }
 
 /* الصفحات */
 .page {
     display: none;
-    animation: fadeIn 0.3s ease;
+    flex: 1;
 }
 
 .page.active {
     display: block;
+    animation: fadeIn 0.3s ease;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
-h1 {
-    text-align: center;
+/* تصميم محول العملات */
+.conversion-container {
+    background: var(--card-color);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: var(--shadow);
     margin-bottom: 30px;
-    color: var(--primary);
 }
 
-/* محول العملات */
-.converter-box {
-    background: var(--card-light);
+.currency-box {
+    background: var(--bg-color);
     border-radius: 15px;
-    padding: 25px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    padding: 20px;
+    margin: 15px 0;
+    border: 2px solid var(--border-color);
+    transition: all 0.3s ease;
 }
 
-body.dark-mode .converter-box {
-    background: var(--card-dark);
+.currency-box:hover {
+    border-color: var(--primary-color);
 }
 
-.currency-input {
+.amount-display {
+    font-size: 48px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 15px;
+    color: var(--text-color);
+    direction: ltr;
+    letter-spacing: 1px;
+}
+
+.currency-selector {
     display: flex;
     align-items: center;
-    margin: 20px 0;
-    background: white;
-    border-radius: 10px;
-    padding: 5px;
-    border: 2px solid #e0e0e0;
+    justify-content: space-between;
+    gap: 15px;
 }
 
-body.dark-mode .currency-input {
-    background: #3a3a3a;
-    border-color: #444;
+.currency-flag {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border-color);
 }
 
-.currency-input input {
+.currency-dropdown {
     flex: 1;
-    border: none;
-    background: transparent;
-    font-size: 28px;
     padding: 10px 15px;
-    color: inherit;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--card-color);
+    color: var(--text-color);
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.3s ease;
 }
 
-.currency-input select {
-    padding: 10px 15px;
-    border: none;
-    background: var(--primary);
-    color: white;
-    border-radius: 8px;
-    font-size: 16px;
-    min-width: 120px;
-    cursor: pointer;
+.currency-dropdown:hover {
+    border-color: var(--primary-color);
+}
+
+.currency-dropdown option {
+    background: var(--card-color);
+    color: var(--text-color);
+    padding: 10px;
+}
+
+.currency-code {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--primary-color);
+    min-width: 60px;
+}
+
+/* زر التبديل */
+.swap-container {
+    display: flex;
+    justify-content: center;
+    margin: 10px 0;
 }
 
 .swap-btn {
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    background: var(--primary);
+    background: var(--primary-color);
     color: white;
     border: none;
-    font-size: 20px;
-    margin: 10px auto;
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    transition: transform 0.3s ease;
+    font-size: 20px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3);
 }
 
 .swap-btn:hover {
-    transform: rotate(180deg);
+    transform: rotate(180deg) scale(1.1);
+    background: var(--secondary-color);
 }
 
-.result {
-    flex: 1;
-    font-size: 28px;
-    padding: 10px 15px;
-    text-align: left;
-    direction: ltr;
-}
-
-.convert-btn {
-    width: 100%;
-    padding: 15px;
-    background: var(--primary);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 18px;
-    margin-top: 20px;
-    cursor: pointer;
-    transition: opacity 0.3s ease;
-}
-
-.convert-btn:hover {
-    opacity: 0.9;
-}
-
+/* معلومات سعر الصرف */
 .rate-info {
-    text-align: center;
-    margin-top: 15px;
-    color: #666;
+    background: rgba(0, 122, 255, 0.1);
+    border: 1px solid rgba(0, 122, 255, 0.2);
+    border-radius: 10px;
+    padding: 12px 20px;
+    margin: 20px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: var(--primary-color);
     font-size: 14px;
 }
 
+.rate-info i {
+    font-size: 16px;
+}
+
+/* زر التحويل */
+.convert-btn {
+    width: 100%;
+    padding: 18px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+    border-radius: 15px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+    box-shadow: 0 6px 20px rgba(0, 122, 255, 0.3);
+}
+
+.convert-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 122, 255, 0.4);
+}
+
+.convert-btn:active {
+    transform: translateY(0);
+}
+
 /* صفحة الأسعار */
+.rates-container {
+    background: var(--card-color);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+}
+
 .search-box {
+    position: relative;
     margin-bottom: 20px;
 }
 
 .search-box input {
     width: 100%;
-    padding: 12px 20px;
-    border: 2px solid #e0e0e0;
-    border-radius: 10px;
+    padding: 15px 20px 15px 45px;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--bg-color);
+    color: var(--text-color);
     font-size: 16px;
-    background: var(--card-light);
-    color: inherit;
+    outline: none;
+    transition: border-color 0.3s ease;
 }
 
-body.dark-mode .search-box input {
-    background: var(--card-dark);
-    border-color: #444;
+.search-box input:focus {
+    border-color: var(--primary-color);
+}
+
+.search-box i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #8e8e93;
 }
 
 .rates-list {
-    display: grid;
-    gap: 10px;
+    max-height: 500px;
+    overflow-y: auto;
 }
 
 .rate-item {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    background: var(--card-light);
     padding: 15px;
-    border-radius: 10px;
-    transition: transform 0.2s ease;
-}
-
-body.dark-mode .rate-item {
-    background: var(--card-dark);
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.3s ease;
+    cursor: pointer;
 }
 
 .rate-item:hover {
-    transform: translateY(-2px);
+    background-color: var(--bg-color);
 }
 
-.currency-info {
+.rate-flag {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-left: 10px;
+    border: 2px solid var(--border-color);
+}
+
+.rate-info-content {
+    flex: 1;
+}
+
+.rate-pair {
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--text-color);
+    margin-bottom: 3px;
+}
+
+.rate-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary-color);
+    direction: ltr;
+}
+
+.rate-date {
+    font-size: 12px;
+    color: #8e8e93;
+    margin-top: 3px;
+}
+
+/* صفحة الإعدادات */
+.settings-container {
+    background: var(--card-color);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+}
+
+.setting-section {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.setting-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.setting-section h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: var(--text-color);
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-.currency-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.currency-name {
-    font-weight: bold;
-}
-
-.currency-code {
-    color: #666;
-    font-size: 14px;
-}
-
-.currency-value {
-    font-size: 18px;
-    font-weight: bold;
-    color: var(--primary);
-}
-
-/* صفحة الإعدادات */
-.settings-box {
-    background: var(--card-light);
-    border-radius: 15px;
-    padding: 25px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-}
-
-body.dark-mode .settings-box {
-    background: var(--card-dark);
-}
-
-.setting-item {
-    margin-bottom: 30px;
-}
-
-.setting-item h3 {
-    margin-bottom: 15px;
-    color: var(--primary);
-}
-
+/* أزرار الوضع المظلم */
 .toggle-options {
     display: flex;
     gap: 10px;
 }
 
-.toggle-btn {
+.toggle-option {
     flex: 1;
-    padding: 12px;
-    border: 2px solid #e0e0e0;
-    background: transparent;
-    color: inherit;
-    border-radius: 8px;
+    padding: 15px;
+    background: var(--bg-color);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    color: var(--text-color);
+    font-size: 14px;
+    font-weight: 500;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     transition: all 0.3s ease;
 }
 
-.toggle-btn.active {
-    background: var(--primary);
+.toggle-option:hover {
+    border-color: var(--primary-color);
+}
+
+.toggle-option.active {
+    background: var(--primary-color);
     color: white;
-    border-color: var(--primary);
+    border-color: var(--primary-color);
 }
 
-.setting-btn {
+/* قائمة الإعدادات */
+.settings-list {
+    background: var(--bg-color);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.setting-item {
     width: 100%;
-    padding: 15px;
-    text-align: right;
-    border: none;
+    padding: 18px 15px;
     background: transparent;
-    color: inherit;
-    border-bottom: 1px solid #e0e0e0;
-    cursor: pointer;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-color);
     font-size: 16px;
+    text-align: right;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
-body.dark-mode .setting-btn {
-    border-bottom-color: #444;
+.setting-item:hover {
+    background-color: rgba(0, 122, 255, 0.1);
 }
 
-.setting-btn:last-child {
+.setting-item:last-child {
     border-bottom: none;
 }
 
-.version {
-    text-align: center;
-    margin-top: 20px;
-    color: #666;
+.setting-item i:first-child {
+    color: var(--primary-color);
+    margin-left: 10px;
+}
+
+.setting-item i:last-child {
+    color: #8e8e93;
+}
+
+.version-info {
+    padding: 18px 15px;
+    display: flex;
+    align-items: center;
+    color: #8e8e93;
     font-size: 14px;
 }
 
+.version-info i {
+    margin-left: 10px;
+}
+
+/* زر التحديث */
 .refresh-btn {
     width: 100%;
-    padding: 15px;
-    background: #28a745;
+    padding: 16px;
+    background: var(--success-color);
     color: white;
     border: none;
-    border-radius: 10px;
+    border-radius: 12px;
     font-size: 16px;
+    font-weight: 500;
     cursor: pointer;
-    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    margin-bottom: 10px;
 }
 
-.update-info {
+.refresh-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.last-update {
     text-align: center;
-    margin-top: 10px;
-    color: #666;
+    font-size: 13px;
+    color: #8e8e93;
+    padding: 5px;
+}
+
+/* شريط التنقل السفلي */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--card-color);
+    display: flex;
+    padding: 10px;
+    border-top: 1px solid var(--border-color);
+    max-width: 500px;
+    margin: 0 auto;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+}
+
+.nav-btn {
+    flex: 1;
+    padding: 12px 5px;
+    background: transparent;
+    border: none;
+    color: #8e8e93;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.3s ease;
+    border-radius: 10px;
+}
+
+.nav-btn i {
+    font-size: 20px;
+}
+
+.nav-btn.active {
+    color: var(--primary-color);
+    background: rgba(0, 122, 255, 0.1);
+}
+
+.nav-btn:hover:not(.active) {
+    color: var(--text-color);
+}
+
+/* التحميل والأخطاء */
+.loading {
+    text-align: center;
+    padding: 30px;
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.loading i {
+    font-size: 40px;
+    color: var(--primary-color);
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.error-message {
+    background: rgba(255, 59, 48, 0.1);
+    border: 1px solid rgba(255, 59, 48, 0.3);
+    color: #ff3b30;
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+    margin: 10px 0;
     font-size: 14px;
 }
 
-/* التحميل */
-.loading {
-    text-align: center;
-    padding: 20px;
-    color: #666;
+/* التمرير */
+::-webkit-scrollbar {
+    width: 6px;
 }
 
-.error {
-    text-align: center;
-    padding: 20px;
-    color: #dc3545;
-    background: rgba(220, 53, 69, 0.1);
+::-webkit-scrollbar-track {
+    background: var(--bg-color);
     border-radius: 10px;
-    margin: 10px 0;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+}
+
+/* التكيف مع الشاشات الصغيرة */
+@media (max-width: 480px) {
+    .app-container {
+        padding: 15px;
+        padding-bottom: 70px;
+    }
+    
+    .amount-display {
+        font-size: 40px;
+    }
+    
+    .currency-dropdown {
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+    
+    .page-title {
+        font-size: 20px;
+    }
+    
+    .conversion-container,
+    .rates-container,
+    .settings-container {
+        padding: 20px;
+    }
 }
