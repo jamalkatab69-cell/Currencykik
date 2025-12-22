@@ -1,0 +1,90 @@
+{
+  "app": {
+    "name": "Currencykik",
+    "title": "Convertisseur de Devises"
+  },
+  "nav": {
+    "settings": "Paramètres",
+    "convert": "Convertir",
+    "rates": "Taux"
+  },
+  "convert": {
+    "title": "Convertir",
+    "amount": "Montant",
+    "from": "De",
+    "to": "À",
+    "swap": "Échanger",
+    "result": "Résultat",
+    "rateAt": "au taux du marché intermédiaire"
+  },
+  "rates": {
+    "title": "Taux",
+    "favorites": "Favoris",
+    "addFavorite": "Ajouter aux favoris",
+    "removeFavorite": "Retirer des favoris",
+    "noFavorites": "Aucune paire favorite",
+    "addPair": "Ajouter une paire"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "darkMode": "Mode sombre",
+    "off": "Désactivé",
+    "on": "Activé",
+    "auto": "Auto",
+    "generalSettings": "Paramètres généraux",
+    "rateApp": "Noter l'application",
+    "termsPrivacy": "Conditions et confidentialité",
+    "version": "Version",
+    "language": "Langue",
+    "notifications": "Notifications",
+    "about": "À propos"
+  },
+  "alerts": {
+    "title": "Alertes",
+    "add": "Ajouter une alerte",
+    "remove": "Supprimer",
+    "targetRate": "Taux cible",
+    "condition": "Condition",
+    "above": "Au-dessus",
+    "below": "En dessous",
+    "active": "Actif",
+    "inactive": "Inactif",
+    "triggered": "Déclenché"
+  },
+  "messages": {
+    "loading": "Chargement...",
+    "error": "Une erreur s'est produite",
+    "noInternet": "Pas de connexion Internet",
+    "ratesUpdated": "Taux mis à jour",
+    "favoriteAdded": "Ajouté aux favoris",
+    "favoriteRemoved": "Retiré des favoris",
+    "alertAdded": "Alerte ajoutée",
+    "alertRemoved": "Alerte supprimée"
+  },
+  "currencies": {
+    "EUR": "Euro",
+    "USD": "Dollar américain",
+    "GBP": "Livre sterling",
+    "CHF": "Franc suisse",
+    "CAD": "Dollar canadien",
+    "AUD": "Dollar australien",
+    "TRY": "Livre turque",
+    "CNY": "Yuan chinois",
+    "BRL": "Réal brésilien",
+    "MXN": "Peso mexicain",
+    "ARS": "Peso argentin",
+    "RUB": "Rouble russe",
+    "ZAR": "Rand sud-africain",
+    "JPY": "Yen japonais",
+    "KRW": "Won sud-coréen",
+    "INR": "Roupie indienne",
+    "HKD": "Dollar de Hong Kong",
+    "MYR": "Ringgit malaisien",
+    "MAD": "Dirham marocain",
+    "EGP": "Livre égyptienne",
+    "TND": "Dinar tunisien",
+    "SAR": "Riyal saoudien",
+    "QAR": "Riyal qatari",
+    "AED": "Dirham des EAU"
+  }
+}
