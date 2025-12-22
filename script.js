@@ -1,115 +1,99 @@
 const API_KEY = 'b83fce53976843bbb59336c03f9a6a30';
-let currentRates = {};
+const BASE_IMG_URL = 'https://raw.githubusercontent.com/username/repo/main/images/'; // استبدل برابط مستودعك
 
-// 1. التنقل بين الشاشات
-function showScreen(screenId, element) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    document.getElementById(screenId).classList.add('active');
-    element.classList.add('active');
-}
+const currencies = {
+    "USD": "101-currency-usd.png",
+    "EUR": "100-currency-eur.png",
+    "GBP": "102-currency-gbp.png",
+    "JPY": "113-currency-jpy.png",
+    "SAR": "121-currency-sar.png",
+    "CAD": "104-currency-cad.png",
+    "MAD": "118-currency-mad.png",
+    "EGP": "119-currency-egp.png"
+    // يمكنك إضافة البقية هنا بنفس النمط
+};
 
-// 2. جلب الأسعار الحقيقية للشاشة الرئيسية
-async function fetchLiveRates() {
-    const pairs = "EUR/USD,USD/JPY,SAR/USD,GBP/USD,USD/SAR";
-    const url = `https://api.twelvedata.com/price?symbol=${pairs}&apikey=${API_KEY}`;
+let exchangeRates = {};
+
+async function fetchRates() {
+    const symbols = Object.keys(currencies).join(',');
+    // طلب Batch لجلب السعر مقابل الدولار كأساس
+    const url = `https://api.twelvedata.com/price?symbol=${symbols}/USD&apikey=${API_KEY}`;
     
     try {
         const response = await fetch(url);
-        currentRates = await response.json();
-        renderRatesList();
-    } catch (error) {
-        console.error("خطأ في جلب البيانات:", error);
-    }
-}
-
-function renderRatesList() {
-    const list = document.getElementById('rates-list');
-    list.innerHTML = '';
-    
-    Object.keys(currentRates).forEach(pair => {
-        const price = parseFloat(currentRates[pair].price).toFixed(4);
-        const item = document.createElement('div');
-        item.className = 'rate-card';
-        item.innerHTML = `
-            <div class="chart-box"><canvas id="chart-${pair.replace('/','-')}"></canvas></div>
-            <div class="rate-info">
-                <div class="pair-name">${pair}</div>
-                <div class="pair-value">1 ${pair.split('/')[0]} = ${price} ${pair.split('/')[1]}</div>
-            </div>
-            <i class="fas fa-trash-alt" style="color: #444; margin-left:10px;" onclick="this.parentElement.remove()"></i>
-        `;
-        list.appendChild(item);
-        drawSimpleChart(`chart-${pair.replace('/','-')}`);
-    });
-}
-
-// 3. منطق المحول (Convert Logic)
-async function performConversion() {
-    const from = document.getElementById('from-currency').value;
-    const to = document.getElementById('to-currency').value;
-    const amount = document.getElementById('from-amount').value;
-    
-    if(from === to) {
-        document.getElementById('to-amount').value = amount;
-        return;
-    }
-
-    const pair = `${from}/${to}`;
-    try {
-        const res = await fetch(`https://api.twelvedata.com/price?symbol=${pair}&apikey=${API_KEY}`);
-        const data = await res.json();
-        const rate = parseFloat(data.price);
+        const data = await response.json();
         
-        document.getElementById('to-amount').value = (amount * rate).toFixed(2);
-        document.getElementById('rate-text').innerText = `1 ${from} = ${rate.toFixed(4)} ${to}`;
-    } catch (e) {
-        document.getElementById('rate-text').innerText = "خطأ في الاتصال";
+        // تحويل البيانات لشكل يسهل التعامل معه
+        Object.keys(data).forEach(pair => {
+            const symbol = pair.split('/')[0];
+            exchangeRates[symbol] = parseFloat(data[pair].price);
+        });
+        
+        // إضافة USD كقاعدة ثابتة
+        exchangeRates["USD"] = 1.0;
+        
+        updateResult();
+    } catch (error) {
+        console.error("خطأ في جلب البيانات", error);
+        document.getElementById('exchange-info').innerText = "فشل تحديث الأسعار";
     }
 }
 
-// 4. تبديل العملات (Swap)
-function swapCurrencies() {
+function populateSelectors() {
     const fromSelect = document.getElementById('from-currency');
     const toSelect = document.getElementById('to-currency');
-    const temp = fromSelect.value;
-    fromSelect.value = toSelect.value;
-    toSelect.value = temp;
-    performConversion();
+
+    Object.keys(currencies).forEach(code => {
+        let opt1 = new Option(code, code);
+        let opt2 = new Option(code, code);
+        fromSelect.add(opt1);
+        toSelect.add(opt2);
+    });
+
+    fromSelect.value = "USD";
+    toSelect.value = "JPY";
+    updateFlags();
 }
 
-// 5. التحكم في الوضع الليلي
-function setDarkMode(isDark) {
-    if(isDark) {
-        document.body.classList.add('dark-mode');
-        document.getElementById('dark-btn').classList.add('active');
-    } else {
-        document.body.classList.remove('dark-mode');
-        document.getElementById('dark-btn').classList.remove('active');
+function updateFlags() {
+    const from = document.getElementById('from-currency').value;
+    const to = document.getElementById('to-currency').value;
+    
+    // ملاحظة: هنا يجب التأكد من مسار الصور الصحيح على GitHub
+    document.getElementById('from-flag').src = `images/${currencies[from]}`;
+    document.getElementById('to-flag').src = `images/${currencies[to]}`;
+}
+
+function updateResult() {
+    const amount = document.getElementById('amount').value;
+    const from = document.getElementById('from-currency').value;
+    const to = document.getElementById('to-currency').value;
+
+    if (exchangeRates[from] && exchangeRates[to]) {
+        // العملة المحولة = المبلغ * (سعر العملة الثانية بالنسبة للدولار / سعر العملة الأولى بالنسبة للدولار)
+        const rate = (1 / exchangeRates[from]) / (1 / exchangeRates[to]);
+        const finalResult = (amount * rate).toFixed(2);
+        
+        document.getElementById('result').value = finalResult;
+        document.getElementById('exchange-info').innerText = `1 ${from} = ${rate.toFixed(4)} ${to} (Mid-market rate)`;
     }
 }
 
-// رسم منحنى تجريبي لكل عملة
-function drawSimpleChart(canvasId) {
-    const ctx = document.getElementById(canvasId).getContext('2d');
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: [1, 2, 3, 4, 5, 6],
-            datasets: [{
-                data: [Math.random(), Math.random(), Math.random(), Math.random(), Math.random(), Math.random()],
-                borderColor: '#4CAF50',
-                borderWidth: 2,
-                pointRadius: 0,
-                fill: false
-            }]
-        },
-        options: { plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
-    });
-}
+// المستمعات (Listeners)
+document.getElementById('amount').addEventListener('input', updateResult);
+document.getElementById('from-currency').addEventListener('change', () => { updateFlags(); updateResult(); });
+document.getElementById('to-currency').addEventListener('change', () => { updateFlags(); updateResult(); });
+document.getElementById('swap').addEventListener('click', () => {
+    const from = document.getElementById('from-currency');
+    const to = document.getElementById('to-currency');
+    const temp = from.value;
+    from.value = to.value;
+    to.value = temp;
+    updateFlags();
+    updateResult();
+});
 
-// تشغيل عند التحميل
-window.onload = () => {
-    fetchLiveRates();
-    performConversion();
-};
+// التشغيل الأولي
+populateSelectors();
+fetchRates();
