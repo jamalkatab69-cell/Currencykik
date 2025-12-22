@@ -1,130 +1,174 @@
-// === rates.js ===
+import { CONFIG, getCurrencyInfo } from './config.js';
+import { getCacheInfo, fetchAllRates } from './converter.js';
 
-// البيانات الافتراضية للأسعار
-const defaultRates = {
-    'EUR': 0.93,
-    'JPY': 150.5,
-    'GBP': 0.79,
-    'CAD': 1.35,
-    'AUD': 1.52,
-    'CHF': 0.88,
-    'CNY': 7.25,
-    'SAR': 3.75,
-    'AED': 3.67,
-    'TRY': 32.5,
-    'BRL': 4.95,
-    'MXN': 17.2,
-    'RUB': 92.0,
-    'KRW': 1330,
-    'INR': 83.0,
-    'ZAR': 18.7,
-    'HKD': 7.82,
-    'MYR': 4.72,
-    'MAD': 10.05,
-    'EGP': 30.9,
-    'TND': 3.12,
-    'QAR': 3.64
-};
-
-// فرز الأسعار
-function sortRates(sortBy = 'code') {
-    const ratesList = document.getElementById('rates-list');
-    const items = Array.from(ratesList.querySelectorAll('.rate-item'));
+// عرض الأسعار المفضلة
+export async function updateRatesDisplay() {
+    const ratesContainer = document.getElementById('ratesContainer');
+    const lastUpdateEl = document.getElementById('ratesLastUpdate');
+    const refreshBtn = document.getElementById('refreshRatesBtn');
     
-    items.sort((a, b) => {
-        const aCode = a.querySelector('.rate-pair').textContent.split(' ')[2];
-        const bCode = b.querySelector('.rate-pair').textContent.split(' ')[2];
-        const aValue = parseFloat(a.querySelector('.rate-value').textContent.replace(/,/g, ''));
-        const bValue = parseFloat(b.querySelector('.rate-value').textContent.replace(/,/g, ''));
+    if (!ratesContainer) return;
+    
+    // عرض مؤشر التحميل
+    ratesContainer.innerHTML = '<div class="loading">جاري تحميل الأسعار...</div>';
+    
+    try {
+        const cacheInfo = getCacheInfo();
+        let rates = cacheInfo.data;
         
-        if (sortBy === 'code') {
-            return aCode.localeCompare(bCode);
-        } else if (sortBy === 'value-asc') {
-            return aValue - bValue;
-        } else if (sortBy === 'value-desc') {
-            return bValue - aValue;
-        }
-        
-        return 0;
-    });
-    
-    // إعادة ترتيب العناصر
-    items.forEach(item => ratesList.appendChild(item));
-}
-
-// إضافة خيارات الفرز
-function addSortOptions() {
-    const ratesContainer = document.querySelector('.rates-container');
-    
-    const sortDiv = document.createElement('div');
-    sortDiv.className = 'sort-options';
-    sortDiv.style.cssText = `
-        display: flex;
-        gap: 10px;
-        margin-bottom: 15px;
-        justify-content: flex-end;
-    `;
-    
-    const sortSelect = document.createElement('select');
-    sortSelect.className = 'sort-select';
-    sortSelect.innerHTML = `
-        <option value="code">فرز حسب العملة</option>
-        <option value="value-asc">السعر: من الأقل للأعلى</option>
-        <option value="value-desc">السعر: من الأعلى للأقل</option>
-    `;
-    
-    sortSelect.addEventListener('change', function() {
-        sortRates(this.value);
-    });
-    
-    sortDiv.appendChild(sortSelect);
-    ratesContainer.insertBefore(sortDiv, ratesContainer.querySelector('.rates-list'));
-}
-
-// تحديث الأسعار تلقائياً كل دقيقة
-function startAutoRefresh(interval = 60000) {
-    setInterval(async () => {
-        if (navigator.onLine) {
-            try {
-                await fetchLiveRates();
-                console.log('تم تحديث الأسعار تلقائياً:', new Date().toLocaleTimeString());
-            } catch (error) {
-                console.error('فشل التحديث التلقائي:', error);
+        // إذا لم يكن هناك كاش أو انتهت صلاحيته، جلب أسعار جديدة
+        if (!cacheInfo.hasCache || !cacheInfo.isValid) {
+            const result = await fetchAllRates();
+            if (result.success) {
+                rates = result.rates;
             }
         }
-    }, interval);
-}
-
-// عرض الرسوم البيانية (يمكن إضافتها لاحقاً)
-function showRateChart(currencyCode) {
-    alert(`سيتم عرض الرسم البياني لـ ${currencyCode} في تحديث قادم`);
-}
-
-// تصدير البيانات كـ CSV
-function exportRatesToCSV() {
-    let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += "العملة,الرمز,السعر مقابل USD,التاريخ\n";
-    
-    currencies.forEach(currency => {
-        if (currency.code !== 'USD') {
-            const rate = defaultRates[currency.code] || 0;
-            csvContent += `${currency.name},${currency.code},${rate},${new Date().toLocaleDateString()}\n`;
+        
+        // عرض الأسعار
+        ratesContainer.innerHTML = '';
+        
+        // قسم المفضلات
+        const favoritesSection = document.createElement('div');
+        favoritesSection.className = 'rates-section';
+        favoritesSection.innerHTML = '<h3 class="section-title">Favourites</h3>';
+        
+        CONFIG.FAVORITE_PAIRS.forEach(pair => {
+            const rateCard = createRateCard(pair.from, pair.to, rates);
+            favoritesSection.appendChild(rateCard);
+        });
+        
+        ratesContainer.appendChild(favoritesSection);
+        
+        // تحديث وقت آخر تحديث
+        if (lastUpdateEl) {
+            const info = getCacheInfo();
+            lastUpdateEl.textContent = info.lastUpdate 
+                ? `آخر تحديث: ${info.lastUpdate}` 
+                : 'لم يتم التحديث بعد';
         }
-    });
-    
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "أسعار_العملات.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+        
+        // إضافة حدث لزر التحديث
+        if (refreshBtn) {
+            refreshBtn.onclick = async () => {
+                refreshBtn.disabled = true;
+                refreshBtn.textContent = 'جاري التحديث...';
+                await updateRatesDisplay();
+                refreshBtn.disabled = false;
+                refreshBtn.textContent = 'تحديث';
+            };
+        }
+        
+    } catch (error) {
+        console.error('Error updating rates display:', error);
+        ratesContainer.innerHTML = '<div class="error">فشل تحميل الأسعار</div>';
+    }
 }
 
-// تهيئة صفحة الأسعار عند التحميل
-document.addEventListener('DOMContentLoaded', function() {
-    addSortOptions();
+// إنشاء بطاقة سعر
+function createRateCard(from, to, rates) {
+    const card = document.createElement('div');
+    card.className = 'rate-card';
     
-    // بدء التحديث التلقائي بعد 5 دقائق
-    setTimeout(() => startAutoRefresh(300000), 5000);
-});
+    const fromInfo = getCurrencyInfo(from);
+    const toInfo = getCurrencyInfo(to);
+    
+    // الحصول على السعر
+    let rate = 'N/A';
+    let rateValue = null;
+    
+    if (rates && rates[from] && rates[from][to]) {
+        rateValue = rates[from][to];
+        rate = rateValue.toFixed(4);
+    }
+    
+    // حساب الاتجاه (صعود/هبوط) - مبسط
+    const trend = Math.random() > 0.5 ? 'up' : 'down';
+    const trendIcon = trend === 'up' ? '↗' : '↘';
+    const trendClass = trend === 'up' ? 'trend-up' : 'trend-down';
+    
+    card.innerHTML = `
+        <div class="rate-card-header">
+            <div class="currency-pair">
+                <span class="currency-flag">${fromInfo?.flag || ''}</span>
+                <span class="currency-flag">${toInfo?.flag || ''}</span>
+            </div>
+            <div class="rate-trend ${trendClass}">
+                <svg width="60" height="30" class="mini-chart">
+                    ${generateMiniChart(trend)}
+                </svg>
+            </div>
+        </div>
+        <div class="rate-card-body">
+            <div class="currency-code">${from} to ${to}</div>
+            <div class="rate-value">${from} = ${rate} ${to} 1</div>
+        </div>
+    `;
+    
+    // إضافة حدث النقر للانتقال لصفحة التحويل
+    card.onclick = () => {
+        // تعيين العملات في صفحة التحويل
+        const currency1Select = document.getElementById('currency1');
+        const currency2Select = document.getElementById('currency2');
+        
+        if (currency1Select && currency2Select) {
+            currency1Select.value = from;
+            currency2Select.value = to;
+            
+            // الانتقال لصفحة التحويل
+            showPage('convert');
+        }
+    };
+    
+    return card;
+}
+
+// توليد رسم بياني صغير
+function generateMiniChart(trend) {
+    // نقاط عشوائية للرسم البياني
+    const points = [];
+    let y = 15;
+    
+    for (let i = 0; i < 10; i++) {
+        const x = i * 6;
+        y += (Math.random() - 0.5) * 5 * (trend === 'up' ? -1 : 1);
+        y = Math.max(5, Math.min(25, y));
+        points.push(`${x},${y}`);
+    }
+    
+    const color = trend === 'up' ? '#4ade80' : '#f87171';
+    
+    return `<polyline points="${points.join(' ')}" fill="none" stroke="${color}" stroke-width="2"/>`;
+}
+
+// إضافة/إزالة من المفضلة
+export function toggleFavorite(from, to) {
+    const index = CONFIG.FAVORITE_PAIRS.findIndex(
+        pair => pair.from === from && pair.to === to
+    );
+    
+    if (index === -1) {
+        CONFIG.FAVORITE_PAIRS.push({ from, to });
+    } else {
+        CONFIG.FAVORITE_PAIRS.splice(index, 1);
+    }
+    
+    // حفظ في localStorage
+    localStorage.setItem('favoritePairs', JSON.stringify(CONFIG.FAVORITE_PAIRS));
+    
+    // تحديث العرض
+    updateRatesDisplay();
+}
+
+// تحميل المفضلات المحفوظة
+export function loadFavorites() {
+    try {
+        const saved = localStorage.getItem('favoritePairs');
+        if (saved) {
+            const pairs = JSON.parse(saved);
+            CONFIG.FAVORITE_PAIRS.length = 0;
+            CONFIG.FAVORITE_PAIRS.push(...pairs);
+        }
+    } catch (error) {
+        console.error('Error loading favorites:', error);
+    }
+}
