@@ -1,10 +1,11 @@
-import { CONFIG, getCurrencyInfo } from './config.js';
-import { getCacheInfo, fetchAllRates } from './converter.js';
+import { getCurrencyInfo, getCurrencyIcon } from './config.js';
+import { getAllRatesFromCache, fetchAllRates } from './converter.js';
+import { getFavorites, toggleFavorite, isFavorite } from './favorites.js';
+import { generateMiniChart } from './charts.js';
 
 // عرض الأسعار المفضلة
 export async function updateRatesDisplay() {
     const ratesContainer = document.getElementById('ratesContainer');
-    const lastUpdateEl = document.getElementById('ratesLastUpdate');
     const refreshBtn = document.getElementById('refreshRatesBtn');
     
     if (!ratesContainer) return;
@@ -13,14 +14,15 @@ export async function updateRatesDisplay() {
     ratesContainer.innerHTML = '<div class="loading">جاري تحميل الأسعار...</div>';
     
     try {
-        const cacheInfo = getCacheInfo();
-        let rates = cacheInfo.data;
+        let rates = getAllRatesFromCache();
         
-        // إذا لم يكن هناك كاش أو انتهت صلاحيته، جلب أسعار جديدة
-        if (!cacheInfo.hasCache || !cacheInfo.isValid) {
+        // إذا لم يكن هناك أسعار، جلب أسعار جديدة
+        if (!rates || Object.keys(rates).length === 0) {
             const result = await fetchAllRates();
             if (result.success) {
                 rates = result.rates;
+            } else {
+                throw new Error('Failed to fetch rates');
             }
         }
         
@@ -32,35 +34,34 @@ export async function updateRatesDisplay() {
         favoritesSection.className = 'rates-section';
         favoritesSection.innerHTML = '<h3 class="section-title">Favourites</h3>';
         
-        CONFIG.FAVORITE_PAIRS.forEach(pair => {
-            const rateCard = createRateCard(pair.from, pair.to, rates);
-            favoritesSection.appendChild(rateCard);
-        });
+        const favorites = getFavorites();
+        
+        if (favorites.length === 0) {
+            favoritesSection.innerHTML += '<p class="no-favorites">لا توجد أزواج مفضلة. اضغط + لإضافة زوج.</p>';
+        } else {
+            favorites.forEach(pair => {
+                const rateCard = createRateCard(pair.from, pair.to, rates);
+                favoritesSection.appendChild(rateCard);
+            });
+        }
         
         ratesContainer.appendChild(favoritesSection);
-        
-        // تحديث وقت آخر تحديث
-        if (lastUpdateEl) {
-            const info = getCacheInfo();
-            lastUpdateEl.textContent = info.lastUpdate 
-                ? `آخر تحديث: ${info.lastUpdate}` 
-                : 'لم يتم التحديث بعد';
-        }
         
         // إضافة حدث لزر التحديث
         if (refreshBtn) {
             refreshBtn.onclick = async () => {
                 refreshBtn.disabled = true;
-                refreshBtn.textContent = 'جاري التحديث...';
+                refreshBtn.innerHTML = '<span class="spinner"></span>';
+                await fetchAllRates();
                 await updateRatesDisplay();
                 refreshBtn.disabled = false;
-                refreshBtn.textContent = 'تحديث';
+                refreshBtn.innerHTML = '🔄';
             };
         }
         
     } catch (error) {
         console.error('Error updating rates display:', error);
-        ratesContainer.innerHTML = '<div class="error">فشل تحميل الأسعار</div>';
+        ratesContainer.innerHTML = '<div class="error">فشل تحميل الأسعار. يرجى المحاولة مرة أخرى.</div>';
     }
 }
 
@@ -81,31 +82,45 @@ function createRateCard(from, to, rates) {
         rate = rateValue.toFixed(4);
     }
     
-    // حساب الاتجاه (صعود/هبوط) - مبسط
+    // حساب الاتجاه (صعود/هبوط) - عشوائي للعرض
     const trend = Math.random() > 0.5 ? 'up' : 'down';
-    const trendIcon = trend === 'up' ? '↗' : '↘';
     const trendClass = trend === 'up' ? 'trend-up' : 'trend-down';
     
+    // رابط الصور
+    const fromIcon = getCurrencyIcon(from, true);
+    const toIcon = getCurrencyIcon(to, true);
+    
     card.innerHTML = `
-        <div class="rate-card-header">
-            <div class="currency-pair">
-                <span class="currency-flag">${fromInfo?.flag || ''}</span>
-                <span class="currency-flag">${toInfo?.flag || ''}</span>
+        <div class="rate-card-content" data-from="${from}" data-to="${to}">
+            <div class="rate-card-left">
+                <div class="currency-icons">
+                    <img src="${fromIcon}" alt="${from}" class="currency-icon" onerror="this.style.display='none'">
+                    <img src="${toIcon}" alt="${to}" class="currency-icon" onerror="this.style.display='none'">
+                </div>
+                <div class="rate-info">
+                    <div class="currency-pair-text">${from} to ${to}</div>
+                    <div class="rate-value">${from} = ${rate} ${to}</div>
+                </div>
             </div>
-            <div class="rate-trend ${trendClass}">
-                <svg width="60" height="30" class="mini-chart">
-                    ${generateMiniChart(trend)}
-                </svg>
+            <div class="rate-card-right">
+                <div class="rate-chart ${trendClass}">
+                    ${generateMiniChart(trend, 60, 30)}
+                </div>
+                <button class="remove-favorite-btn" data-from="${from}" data-to="${to}" title="Remove from favorites">
+                    ×
+                </button>
             </div>
-        </div>
-        <div class="rate-card-body">
-            <div class="currency-code">${from} to ${to}</div>
-            <div class="rate-value">${from} = ${rate} ${to} 1</div>
         </div>
     `;
     
     // إضافة حدث النقر للانتقال لصفحة التحويل
-    card.onclick = () => {
+    const content = card.querySelector('.rate-card-content');
+    content.onclick = (e) => {
+        // تجاهل النقر على زر الإزالة
+        if (e.target.classList.contains('remove-favorite-btn')) {
+            return;
+        }
+        
         // تعيين العملات في صفحة التحويل
         const currency1Select = document.getElementById('currency1');
         const currency2Select = document.getElementById('currency2');
@@ -115,60 +130,106 @@ function createRateCard(from, to, rates) {
             currency2Select.value = to;
             
             // الانتقال لصفحة التحويل
-            showPage('convert');
+            if (window.showPage) {
+                window.showPage('convert');
+            }
         }
+    };
+    
+    // إضافة حدث زر الإزالة
+    const removeBtn = card.querySelector('.remove-favorite-btn');
+    removeBtn.onclick = (e) => {
+        e.stopPropagation();
+        removeFavoriteWithAnimation(card, from, to);
     };
     
     return card;
 }
 
-// توليد رسم بياني صغير
-function generateMiniChart(trend) {
-    // نقاط عشوائية للرسم البياني
-    const points = [];
-    let y = 15;
+// إزالة من المفضلة مع أنيميشن
+function removeFavoriteWithAnimation(card, from, to) {
+    card.style.animation = 'slideOut 0.3s ease-out';
     
-    for (let i = 0; i < 10; i++) {
-        const x = i * 6;
-        y += (Math.random() - 0.5) * 5 * (trend === 'up' ? -1 : 1);
-        y = Math.max(5, Math.min(25, y));
-        points.push(`${x},${y}`);
-    }
-    
-    const color = trend === 'up' ? '#4ade80' : '#f87171';
-    
-    return `<polyline points="${points.join(' ')}" fill="none" stroke="${color}" stroke-width="2"/>`;
+    setTimeout(() => {
+        toggleFavorite(from, to);
+        updateRatesDisplay();
+    }, 300);
 }
 
-// إضافة/إزالة من المفضلة
-export function toggleFavorite(from, to) {
-    const index = CONFIG.FAVORITE_PAIRS.findIndex(
-        pair => pair.from === from && pair.to === to
-    );
+// فتح مودال إضافة زوج جديد
+export function showAddPairModal() {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Currency Pair</h3>
+                <button class="modal-close" onclick="this.closest('.modal').remove()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>From Currency</label>
+                    <select id="modalFromCurrency" class="modal-select"></select>
+                </div>
+                <div class="form-group">
+                    <label>To Currency</label>
+                    <select id="modalToCurrency" class="modal-select"></select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="this.closest('.modal').remove()">Cancel</button>
+                <button class="btn-add" id="modalAddBtn">Add</button>
+            </div>
+        </div>
+    `;
     
-    if (index === -1) {
-        CONFIG.FAVORITE_PAIRS.push({ from, to });
-    } else {
-        CONFIG.FAVORITE_PAIRS.splice(index, 1);
-    }
+    document.body.appendChild(modal);
     
-    // حفظ في localStorage
-    localStorage.setItem('favoritePairs', JSON.stringify(CONFIG.FAVORITE_PAIRS));
+    // ملء القوائم المنسدلة
+    const fromSelect = document.getElementById('modalFromCurrency');
+    const toSelect = document.getElementById('modalToCurrency');
     
-    // تحديث العرض
-    updateRatesDisplay();
-}
-
-// تحميل المفضلات المحفوظة
-export function loadFavorites() {
-    try {
-        const saved = localStorage.getItem('favoritePairs');
-        if (saved) {
-            const pairs = JSON.parse(saved);
-            CONFIG.FAVORITE_PAIRS.length = 0;
-            CONFIG.FAVORITE_PAIRS.push(...pairs);
+    const currencies = getAllCurrencyCodes();
+    currencies.forEach(code => {
+        const info = getCurrencyInfo(code);
+        fromSelect.innerHTML += `<option value="${code}">${code} - ${info.name}</option>`;
+        toSelect.innerHTML += `<option value="${code}">${code} - ${info.name}</option>`;
+    });
+    
+    // تعيين قيم افتراضية مختلفة
+    fromSelect.value = 'USD';
+    toSelect.value = 'EUR';
+    
+    // حدث زر الإضافة
+    document.getElementById('modalAddBtn').onclick = () => {
+        const from = fromSelect.value;
+        const to = toSelect.value;
+        
+        if (from === to) {
+            alert('Please select different currencies');
+            return;
         }
-    } catch (error) {
-        console.error('Error loading favorites:', error);
-    }
+        
+        if (isFavorite(from, to)) {
+            alert('This pair is already in favorites');
+            return;
+        }
+        
+        toggleFavorite(from, to);
+        modal.remove();
+        updateRatesDisplay();
+    };
+    
+    // إغلاق عند النقر خارج المودال
+    modal.onclick = (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    };
+}
+
+// استيراد جميع أكواد العملات
+function getAllCurrencyCodes() {
+    const { CONFIG } = await import('./config.js');
+    return CONFIG.CURRENCIES.map(c => c.code);
 }
