@@ -95,6 +95,12 @@ body {
     margin-bottom: 20px;
 }
 
+.page-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
 /* Convert Page */
 .converter-container {
     display: flex;
