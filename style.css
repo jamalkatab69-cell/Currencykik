@@ -1,57 +1,97 @@
 :root {
-    --bg-black: #0a0a0a;
-    --card-gray: #1a1a1a;
-    --text-white: #ffffff;
-    --text-gray: #888888;
-    --accent-green: #4CAF50;
+    --bg-color: #121212;
+    --card-bg: #1e1e1e;
+    --text-color: #ffffff;
+    --accent-color: #4cd964;
+    --input-bg: #2c2c2e;
 }
 
 body {
-    background-color: var(--bg-black);
-    color: var(--text-white);
-    font-family: 'Segoe UI', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
-    overflow-x: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
 }
 
-.app-container { max-width: 450px; margin: auto; min-height: 100vh; position: relative; }
+.app-container {
+    width: 100%;
+    max-width: 400px;
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
 
-.screen { display: none; padding: 20px; }
-.screen.active { display: block; animation: fadeIn 0.3s; }
+h1 { text-align: center; font-size: 24px; margin-bottom: 30px; }
 
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.converter-box {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
 
-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.header-icon.plus { color: var(--accent-green); border: 1px solid #333; padding: 5px 15px; border-radius: 20px; cursor: pointer; }
+.input-group {
+    background: var(--input-bg);
+    padding: 15px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #3a3a3c;
+}
 
-.label-section { color: var(--text-gray); border-bottom: 1px solid #222; padding: 10px 0; margin-bottom: 10px; text-align: right; font-size: 14px; }
+input {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 20px;
+    width: 60%;
+    outline: none;
+}
 
-/* بطاقات العملات في الشاشة الرئيسية */
-.rate-card { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #1a1a1a; }
-.chart-box { width: 80px; height: 40px; }
-.rate-info { text-align: right; }
-.pair-name { font-weight: bold; font-size: 16px; }
-.pair-value { color: var(--text-gray); font-size: 12px; margin-top: 4px; }
+select {
+    background: transparent;
+    color: white;
+    border: none;
+    font-weight: bold;
+}
 
-/* شاشة المحول */
-.input-card { background: var(--card-gray); border-radius: 12px; padding: 20px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333; }
-.input-card input { background: transparent; border: none; color: white; font-size: 24px; width: 60%; outline: none; }
-.currency-selector { display: flex; align-items: center; gap: 8px; font-weight: bold; }
+.flag {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    object-fit: cover;
+}
 
-.swap-divider { display: flex; justify-content: center; margin: -15px 0; position: relative; z-index: 5; }
-.swap-circle { background: var(--accent-green); color: black; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.swap-icon {
+    text-align: center;
+    font-size: 24px;
+    color: var(--accent-color);
+    cursor: pointer;
+    margin: -10px 0;
+}
 
-.info-note { background: #222; padding: 15px; border-radius: 10px; margin-top: 20px; font-size: 12px; color: var(--text-gray); text-align: center; }
+.rate-info {
+    background: #2c2c2e;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #8e8e93;
+    text-align: center;
+}
 
-/* شريط التنقل */
-.bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 450px; background: #000; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #222; }
-.nav-item { color: var(--text-gray); text-align: center; cursor: pointer; transition: 0.3s; }
-.nav-item.active { color: var(--accent-green); }
-.nav-item i { display: block; font-size: 18px; margin-bottom: 5px; }
-.nav-item span { font-size: 10px; }
+.bottom-nav {
+    display: flex;
+    justify-content: space-around;
+    padding: 15px 0;
+    border-top: 1px solid #2c2c2e;
+}
 
-/* الإعدادات */
-.toggle-switch { display: flex; background: #1a1a1a; border-radius: 20px; padding: 2px; }
-.toggle-switch button { background: transparent; border: none; color: white; padding: 5px 15px; border-radius: 20px; cursor: pointer; }
-.toggle-switch button.active { background: #333; }
-.menu-item { padding: 15px 0; border-bottom: 1px solid #222; display: flex; justify-content: space-between; }
+.nav-item { color: #8e8e93; font-size: 12px; text-align: center; cursor: pointer; }
+.nav-item.active { color: var(--accent-color); }
+
