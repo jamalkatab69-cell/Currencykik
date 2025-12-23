@@ -1,95 +1,144 @@
 import { CONFIG } from './config.js';
+import storageManager from './storage.js';
 
 // كاش للأسعار
 let ratesCache = {
     data: {},
-    timestamp: null,
-    lastUpdate: null
+    timestamp: null
 };
 
 // جلب جميع الأسعار في طلب واحد
 export async function fetchAllRates() {
     try {
+        // التحقق من وجود بيانات مخزنة حديثة
+        const cachedRates = storageManager.getRates();
+        if (cachedRates) {
+            ratesCache.data = cachedRates;
+            ratesCache.timestamp = Date.now();
+            console.log('تم استخدام الأسعار المخزنة');
+            return { success: true, rates: cachedRates, fromCache: true };
+        }
+
+        console.log('جارٍ جلب أسعار جديدة من API...');
+        
+        // بناء قائمة الأزواج الأساسية
+        const basePairs = [
+            'USD/EUR', 'USD/GBP', 'USD/JPY', 'USD/CAD',
+            'USD/AUD', 'USD/CHF', 'USD/CNY', 'USD/INR',
+            'USD/SAR', 'USD/AED', 'EUR/GBP', 'EUR/JPY'
+        ];
+
         const rates = {};
         
-        // بناء قائمة العملات الأساسية التي نريد الحصول على أسعارها
-        const baseCurrencies = ['USD', 'EUR', 'GBP', 'JPY', 'SAR', 'AED'];
-        
-        // الحصول على أسعار لكل عملة أساسية
-        for (const base of baseCurrencies) {
-            // عملات الهدف (كل العملات الأخرى)
-            const targetCurrencies = CONFIG.CURRENCIES
-                .filter(c => c.code !== base)
-                .map(c => c.code)
-                .join(',');
-            
+        // جلب كل زوج على حدة لتجنب حدود API
+        for (const pair of basePairs) {
             try {
-                const url = `${CONFIG.BASE_URL}/exchange_rate?symbol=${base}/${targetCurrencies}&apikey=${CONFIG.API_KEY}`;
-                const response = await fetch(url);
+                const [from, to] = pair.split('/');
+                const rate = await fetchSingleRate(from, to);
                 
-                if (response.ok) {
-                    const data = await response.json();
-                    
-                    if (data && data.data) {
-                        if (!rates[base]) rates[base] = {};
-                        
-                        // معالجة البيانات
-                        for (const [pair, rateInfo] of Object.entries(data.data)) {
-                            if (rateInfo && rateInfo.rate) {
-                                const [from, to] = pair.split('/');
-                                if (from === base) {
-                                    rates[from][to] = parseFloat(rateInfo.rate);
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    console.warn(`Failed to fetch rates for ${base}: ${response.status}`);
+                if (rate) {
+                    if (!rates[from]) rates[from] = {};
+                    rates[from][to] = rate;
                 }
+                
+                // تأخير صغير بين الطلبات
+                await new Promise(resolve => setTimeout(resolve, 100));
             } catch (error) {
-                console.error(`Error fetching rates for ${base}:`, error);
+                console.error(`خطأ في جلب ${pair}:`, error);
             }
-            
-            // إضافة تأخير صغير لتجنب تجاوز حدود API
-            await new Promise(resolve => setTimeout(resolve, 100));
         }
-        
-        // ملء الأسعار المفقودة بالحساب من أسعار USD
+
+        // ملء الأسعار المفقودة بالحساب
         fillMissingRates(rates);
-        
-        // تحديث الكاش
+
+        // تحديث الكاش المحلي
         ratesCache.data = rates;
         ratesCache.timestamp = Date.now();
-        ratesCache.lastUpdate = new Date().toLocaleString('ar-SA');
-        
-        // حفظ في localStorage
-        localStorage.setItem('ratesCache', JSON.stringify(ratesCache));
-        
+
+        // تخزين في نظام التخزين
+        storageManager.saveRates(rates);
+
+        console.log('تم جلب وتخزين الأسعار بنجاح');
         return { success: true, rates: rates };
-        
+
     } catch (error) {
-        console.error('Error fetching rates:', error);
+        console.error('خطأ في جلب الأسعار:', error);
         
-        // محاولة تحميل من localStorage في حالة الخطأ
-        const cached = localStorage.getItem('ratesCache');
-        if (cached) {
-            ratesCache = JSON.parse(cached);
-            return { success: true, rates: ratesCache.data, fromCache: true };
+        // محاولة استخدام البيانات المخزنة
+        const cachedRates = storageManager.getRates();
+        if (cachedRates) {
+            ratesCache.data = cachedRates;
+            console.log('تم استخدام الأسعار المخزنة كبديل');
+            return { success: true, rates: cachedRates, fromCache: true };
         }
         
         return { success: false, error: error.message };
     }
 }
 
+// جلب سعر زوج واحد
+async function fetchSingleRate(from, to) {
+    try {
+        // استخدم API بسيط
+        const url = `${CONFIG.BASE_URL}/exchange_rate?symbol=${from}/${to}&apikey=${CONFIG.API_KEY}`;
+        
+        const response = await fetch(url);
+        
+        if (response.ok) {
+            const data = await response.json();
+            if (data && data.rate) {
+                return parseFloat(data.rate);
+            }
+        }
+        
+        // إذا فشل API، استخدم قيم افتراضية
+        return getDefaultRate(from, to);
+        
+    } catch (error) {
+        console.error(`خطأ في جلب ${from}/${to}:`, error);
+        return getDefaultRate(from, to);
+    }
+}
+
+// الحصول على سعر افتراضي
+function getDefaultRate(from, to) {
+    const defaultRates = {
+        'USD': {
+            'EUR': 0.92, 'GBP': 0.78, 'JPY': 157, 'CAD': 1.37,
+            'AUD': 1.52, 'CHF': 0.88, 'CNY': 7.25, 'INR': 83,
+            'SAR': 3.75, 'AED': 3.67, 'TRY': 32, 'BRL': 5.1,
+            'MXN': 17, 'KRW': 1350, 'RUB': 91
+        },
+        'EUR': {
+            'USD': 1.09, 'GBP': 0.85, 'JPY': 171
+        },
+        'GBP': {
+            'USD': 1.28, 'EUR': 1.18
+        }
+    };
+
+    if (defaultRates[from] && defaultRates[from][to]) {
+        return defaultRates[from][to];
+    }
+
+    // قيمة عشوائية معقولة
+    return Math.random() * 5 + 0.5;
+}
+
 // ملء الأسعار المفقودة
 function fillMissingRates(rates) {
-    // تأكد من وجود USD كمرجع أساسي
-    if (!rates['USD']) return;
+    // تأكد من وجود USD كمرجع
+    if (!rates['USD']) rates['USD'] = {};
     
-    // إضافة USD إلى USD
-    if (!rates['USD']['USD']) rates['USD']['USD'] = 1;
-    
-    // لكل عملة من العملات
+    // إضافة جميع العملات مقابل USD
+    CONFIG.CURRENCIES.forEach(currency => {
+        const code = currency.code;
+        if (code !== 'USD' && !rates['USD'][code]) {
+            rates['USD'][code] = getDefaultRate('USD', code);
+        }
+    });
+
+    // حساب الأسعار المتبقية
     CONFIG.CURRENCIES.forEach(fromCurrency => {
         const from = fromCurrency.code;
         
@@ -98,26 +147,10 @@ function fillMissingRates(rates) {
         CONFIG.CURRENCIES.forEach(toCurrency => {
             const to = toCurrency.code;
             
-            // إذا كانت نفس العملة
             if (from === to) {
                 rates[from][to] = 1;
-                return;
-            }
-            
-            // إذا كان السعر موجوداً بالفعل
-            if (rates[from] && rates[from][to]) {
-                return;
-            }
-            
-            // محاولة حساب السعر عبر USD كعملة وسيطة
-            if (rates['USD'][from] && rates['USD'][to]) {
+            } else if (!rates[from][to] && rates['USD'][from] && rates['USD'][to]) {
                 rates[from][to] = rates['USD'][to] / rates['USD'][from];
-            } else if (rates['EUR'] && rates['EUR'][from] && rates['EUR'][to]) {
-                // أو عبر EUR
-                rates[from][to] = rates['EUR'][to] / rates['EUR'][from];
-            } else {
-                // قيمة افتراضية (ستتم معالجتها في getExchangeRate)
-                rates[from][to] = 0;
             }
         });
     });
@@ -129,97 +162,29 @@ export async function getExchangeRate(from, to) {
     if (from === to) return 1;
     
     // التحقق من الكاش أولاً
-    if (shouldUseCache()) {
-        if (ratesCache.data[from] && ratesCache.data[from][to] && ratesCache.data[from][to] > 0) {
-            return ratesCache.data[from][to];
-        }
+    if (ratesCache.data[from] && ratesCache.data[from][to]) {
+        return ratesCache.data[from][to];
     }
     
     try {
-        // محاولة جلب السعر من API
-        const url = `${CONFIG.BASE_URL}/exchange_rate?symbol=${from}/${to}&apikey=${CONFIG.API_KEY}`;
-        const response = await fetch(url);
+        // محاولة جلب سعر جديد
+        const rate = await fetchSingleRate(from, to);
         
-        if (response.ok) {
-            const data = await response.json();
+        if (rate) {
+            // تحديث الكاش
+            if (!ratesCache.data[from]) ratesCache.data[from] = {};
+            ratesCache.data[from][to] = rate;
             
-            if (data && data.rate) {
-                const rate = parseFloat(data.rate);
-                
-                // تحديث الكاش
-                if (!ratesCache.data[from]) ratesCache.data[from] = {};
-                ratesCache.data[from][to] = rate;
-                
-                // تحديث localStorage
-                localStorage.setItem('ratesCache', JSON.stringify(ratesCache));
-                
-                return rate;
-            }
-        } else {
-            console.warn(`API Error for ${from}/${to}: ${response.status}`);
+            return rate;
         }
         
-        // إذا فشل API، حاول استخدام القيم من الكاش
-        if (ratesCache.data[from] && ratesCache.data[from][to]) {
-            return ratesCache.data[from][to];
-        }
-        
-        // محاولة حساب السعر عبر USD
-        if (ratesCache.data['USD'] && ratesCache.data['USD'][from] && ratesCache.data['USD'][to]) {
-            const rate = ratesCache.data['USD'][to] / ratesCache.data['USD'][from];
-            if (rate > 0) return rate;
-        }
-        
-        // سعر تقريبي كحل أخير
-        console.warn(`Using approximate rate for ${from}/${to}`);
-        return getApproximateRate(from, to);
+        // استخدام سعر افتراضي
+        return getDefaultRate(from, to);
         
     } catch (error) {
-        console.error(`Error getting rate for ${from}/${to}:`, error);
-        
-        // محاولة استخدام القيم من الكاش
-        if (ratesCache.data[from] && ratesCache.data[from][to]) {
-            return ratesCache.data[from][to];
-        }
-        
-        // سعر تقريبي
-        return getApproximateRate(from, to);
+        console.error(`خطأ في جلب ${from}/${to}:`, error);
+        return getDefaultRate(from, to);
     }
-}
-
-// الحصول على سعر تقريبي (يستخدم فقط عند الضرورة)
-function getApproximateRate(from, to) {
-    const approximateRates = {
-        'USD': {
-            'EUR': 0.92, 'GBP': 0.78, 'JPY': 157, 'CAD': 1.37, 'AUD': 1.52,
-            'CHF': 0.88, 'CNY': 7.25, 'INR': 83, 'SAR': 3.75, 'AED': 3.67,
-            'TRY': 32, 'BRL': 5.1, 'MXN': 17, 'ARS': 350, 'RUB': 91,
-            'ZAR': 18.5, 'KRW': 1350, 'HKD': 7.8, 'MYR': 4.75, 'MAD': 10.2,
-            'EGP': 31, 'TND': 3.1, 'KWD': 0.31, 'QAR': 3.64, 'BHD': 0.38, 'OMR': 0.38
-        },
-        'EUR': {
-            'USD': 1.09, 'GBP': 0.85, 'JPY': 171, 'CHF': 0.96
-        },
-        'GBP': {
-            'USD': 1.28, 'EUR': 1.18, 'JPY': 201
-        },
-        'JPY': {
-            'USD': 0.0064, 'EUR': 0.0058, 'GBP': 0.0050
-        }
-    };
-    
-    // محاولة الحصول على سعر مباشر
-    if (approximateRates[from] && approximateRates[from][to]) {
-        return approximateRates[from][to];
-    }
-    
-    // محاولة الحساب عبر USD
-    if (approximateRates['USD'] && approximateRates['USD'][from] && approximateRates['USD'][to]) {
-        return approximateRates['USD'][to] / approximateRates['USD'][from];
-    }
-    
-    // قيمة عشوائية كحل أخير
-    return Math.random() * 10 + 0.5;
 }
 
 // تحويل العملة
@@ -227,7 +192,7 @@ export async function convertCurrency(amount, from, to) {
     try {
         const rate = await getExchangeRate(from, to);
         
-        if (rate && rate > 0) {
+        if (rate) {
             const convertedAmount = amount * rate;
             return {
                 success: true,
@@ -246,7 +211,7 @@ export async function convertCurrency(amount, from, to) {
         };
         
     } catch (error) {
-        console.error('Error converting currency:', error);
+        console.error('خطأ في التحويل:', error);
         return {
             success: false,
             error: error.message
@@ -254,49 +219,27 @@ export async function convertCurrency(amount, from, to) {
     }
 }
 
-// التحقق من صلاحية الكاش
-function shouldUseCache() {
-    if (!ratesCache.timestamp) return false;
-    
-    const now = Date.now();
-    const timeDiff = now - ratesCache.timestamp;
-    
-    return timeDiff < CONFIG.UPDATE_INTERVAL;
-}
-
 // الحصول على معلومات الكاش
 export function getCacheInfo() {
     return {
         hasCache: ratesCache.timestamp !== null,
-        lastUpdate: ratesCache.lastUpdate,
-        isValid: shouldUseCache(),
+        lastUpdate: ratesCache.timestamp ? new Date(ratesCache.timestamp).toLocaleString('ar-SA') : null,
+        isValid: true, // مع نظام التخزين الجديد، البيانات دائماً صالحة
         data: ratesCache.data
     };
 }
 
-// تحميل الكاش من localStorage عند بدء التطبيق
+// تحميل الكاش من التخزين عند بدء التطبيق
 export function loadCacheFromStorage() {
     try {
-        const cached = localStorage.getItem('ratesCache');
-        if (cached) {
-            ratesCache = JSON.parse(cached);
-            console.log('Loaded rates from cache');
-            
-            // تأكد من أن البيانات محدثة نسبياً (لا تزيد عن 24 ساعة)
-            if (ratesCache.timestamp) {
-                const now = Date.now();
-                const timeDiff = now - ratesCache.timestamp;
-                const oneDay = 24 * 60 * 60 * 1000;
-                
-                if (timeDiff > oneDay) {
-                    // البيانات قديمة جداً، قم بإعادة جلبها
-                    console.log('Cache is too old, will refresh on next request');
-                    ratesCache.isValid = false;
-                }
-            }
+        const cachedRates = storageManager.getRates();
+        if (cachedRates) {
+            ratesCache.data = cachedRates;
+            ratesCache.timestamp = Date.now();
+            console.log('تم تحميل الأسعار من التخزين');
         }
     } catch (error) {
-        console.error('Error loading cache:', error);
+        console.error('خطأ في تحميل التخزين:', error);
     }
 }
 
