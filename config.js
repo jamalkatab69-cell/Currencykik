@@ -1,6 +1,6 @@
 // إعدادات API
 export const CONFIG = {
-    API_KEY: 'demo', // سأستخدم API demo لأن العملات متوفرة فيها
+    API_KEY: 'b83fce53976843bbb59336c03f9a6a30', // مفتاح API حقيقي
     BASE_URL: 'https://api.twelvedata.com',
     UPDATE_INTERVAL: 30 * 60 * 1000, // 30 دقيقة بالميلي ثانية
     
