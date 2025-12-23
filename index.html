@@ -1,10 +1,73 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency Converter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- صفحة التحويل -->
+        <div id="convertPage" class="page active">
+            <h1 class="page-title">Convert</h1>
+            
+            <div class="converter-container">
+                <!-- العملة الأولى -->
+                <div class="currency-input-card">
+                    <input type="number" id="amount1" class="amount-input" value="1000" placeholder="0" min="0" step="0.01">
+                    <div class="currency-selector">
+                        <select id="currency1" class="currency-select">
+                            <!-- سيتم ملؤها من JS -->
+                        </select>
+                        <span class="currency-icon" id="icon1">
+                            <img src="https://raw.githubusercontent.com/jamalkatabeuro-sketch/My-website/main/101-currency-usd.png" alt="USD" class="currency-icon-img">
+                        </span>
+                    </div>
+                </div>
+
+                <!-- زر التبديل -->
+                <button class="swap-btn" id="swapBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M7 10L12 15L17 10" stroke="white" stroke-width="2"/>
+                        <path d="M17 14L12 9L7 14" stroke="white" stroke-width="2"/>
+                    </svg>
+                </button>
+
+                <!-- العملة الثانية -->
+                <div class="currency-input-card">
+                    <input type="number" id="amount2" class="amount-input" value="0" readonly placeholder="0">
+                    <div class="currency-selector">
+                        <select id="currency2" class="currency-select">
+                            <!-- سيتم ملؤها من JS -->
+                        </select>
+                        <span class="currency-icon" id="icon2">
+                            <img src="https://raw.githubusercontent.com/jamalkatabeuro-sketch/My-website/main/113-currency-jpy.png" alt="JPY" class="currency-icon-img">
+                        </span>
+                    </div>
+                </div>
+
+                <!-- عرض السعر -->
+                <div class="rate-display" id="rateDisplay">
+                    <span>USD = 156.2883 JPY at the mid-market 1 rate</span>
+                    <span class="trend-icon">↘</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- صفحة الأسعار -->
+        <div id="ratesPage" class="page">
+            <div class="page-header">
+                <h1 class="page-title">Rates</h1>
+                <div>
+                    <button class="delete-btn" id="deleteFavoriteBtn" title="حذف عملات">-</button>
+                    <button class="add-btn" id="addFavoriteBtn" title="إضافة عملات">+</button>
+                </div>
             </div>
             
             <div id="ratesContainer" class="rates-container">
                 <!-- سيتم ملؤها من JS -->
             </div>
-            
-            <!-- تمت إزالة قسم آخر تحديث -->
         </div>
 
         <!-- صفحة الإعدادات -->
@@ -29,14 +92,14 @@
                     <div class="setting-item">
                         <span>Rate the app</span>
                         <button class="setting-btn">
-                            <span class="emoji">😊</span>
+                            <span class="emoji">💷</span>
                         </button>
                     </div>
                     
                     <div class="setting-item">
                         <span>Terms and privacy</span>
                         <button class="setting-btn">
-                            <span class="emoji">⚠️</span>
+                            <span class="emoji">💸</span>
                         </button>
                     </div>
                 </div>
