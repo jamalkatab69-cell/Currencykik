@@ -1,5 +1,6 @@
-import { CONFIG, getCurrencyInfo, getCurrencyIcon } from './config.js';
-import { getCacheInfo, fetchAllRates } from './converter.js';
+import { CONFIG, getCurrencyInfo } from './config.js';
+import { getCacheInfo, fetchAllRates, getExchangeRate } from './converter.js';
+import storageManager from './storage.js';
 
 // عرض الأسعار المفضلة
 export async function updateRatesDisplay() {
@@ -7,85 +8,98 @@ export async function updateRatesDisplay() {
     
     if (!ratesContainer) return;
     
-    // عرض مؤشر التحميل
     ratesContainer.innerHTML = '<div class="loading">جاري تحميل الأسعار...</div>';
     
     try {
+        // تحديث الأسعار أولاً
+        await fetchAllRates();
         const cacheInfo = getCacheInfo();
-        let rates = cacheInfo.data;
+        const rates = cacheInfo.data;
         
-        // إذا لم يكن هناك كاش أو انتهت صلاحيته، جلب أسعار جديدة
-        if (!cacheInfo.hasCache || !cacheInfo.isValid) {
-            const result = await fetchAllRates();
-            if (result.success) {
-                rates = result.rates;
-            }
-        }
-        
-        // عرض الأسعار
         ratesContainer.innerHTML = '';
         
         if (CONFIG.FAVORITE_PAIRS.length === 0) {
-            ratesContainer.innerHTML = '<div class="no-favorites">لا توجد عملات مفضلة<br><br>اضغط + لإضافة عملات</div>';
+            ratesContainer.innerHTML = `
+                <div class="no-favorites">
+                    <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
+                    <div>لا توجد عملات مفضلة</div>
+                    <div style="margin-top: 8px; font-size: 14px; color: var(--text-secondary);">
+                        اضغط + لإضافة عملات
+                    </div>
+                </div>
+            `;
             return;
         }
         
         // إنشاء بطاقات للأسعار المفضلة
-        CONFIG.FAVORITE_PAIRS.forEach(pair => {
-            const rateCard = createRateCard(pair.from, pair.to, rates);
+        for (const pair of CONFIG.FAVORITE_PAIRS) {
+            const rateCard = await createRateCard(pair.from, pair.to, rates);
             ratesContainer.appendChild(rateCard);
-        });
+        }
         
     } catch (error) {
-        console.error('Error updating rates display:', error);
+        console.error('خطأ في عرض الأسعار:', error);
         ratesContainer.innerHTML = '<div class="error">فشل تحميل الأسعار</div>';
     }
 }
 
-// إنشاء بطاقة سعر كما في الصورة
-function createRateCard(from, to, rates) {
+// إنشاء بطاقة سعر (كما في الصورة الثالثة)
+async function createRateCard(from, to, rates) {
     const card = document.createElement('div');
     card.className = 'rate-card';
     
-    const fromInfo = getCurrencyInfo(from);
-    const toInfo = getCurrencyInfo(to);
-    
     // الحصول على السعر
-    let rate = 'N/A';
-    let rateValue = null;
+    let rateValue = rates && rates[from] && rates[from][to] ? rates[from][to] : null;
     
-    if (rates && rates[from] && rates[from][to]) {
-        rateValue = rates[from][to];
-        // تنسيق السعر كما في الصورة
-        if (rateValue >= 1) {
-            rate = rateValue.toFixed(4);
-        } else {
-            rate = rateValue.toFixed(4);
-        }
+    if (!rateValue) {
+        rateValue = await getExchangeRate(from, to);
     }
     
-    // تحديد الاتجاه
-    const trend = Math.random() > 0.5 ? 'up' : 'down';
-    const trendIcon = trend === 'up' ? '↗' : '↘';
-    const trendClass = trend === 'up' ? 'trend-up' : 'trend-down';
+    const rate = rateValue ? rateValue.toFixed(4) : 'N/A';
+    
+    // الحصول على صور العملات
+    const fromIcon = await storageManager.cacheImage(
+        `https://raw.githubusercontent.com/jamalkatabeuro-sketch/My-website/main/${getCurrencyInfo(from)?.icon || '101-currency-usd.png'}`,
+        from
+    );
+    
+    const toIcon = await storageManager.cacheImage(
+        `https://raw.githubusercontent.com/jamalkatabeuro-sketch/My-website/main/${getCurrencyInfo(to)?.icon || '101-currency-usd.png'}`,
+        to
+    );
+    
+    // إنشاء شارت صغير
+    const chartSVG = generateMiniChart();
     
     card.innerHTML = `
-        <div class="rate-card-content">
-            <div class="rate-card-title">${from} to ${to}</div>
-            <div class="rate-card-value">${from} = ${rate} ${to}</div>
+        <div class="rate-card-main">
+            <div class="rate-card-icons">
+                <img src="${fromIcon}" alt="${from}" class="rate-currency-icon">
+                <img src="${toIcon}" alt="${to}" class="rate-currency-icon">
+            </div>
+            <div class="rate-card-content">
+                <div class="rate-card-value">
+                    <span class="rate-from">${from}</span>
+                    <span class="rate-equals"> = </span>
+                    <span class="rate-amount">${rate}</span>
+                    <span class="rate-to"> ${to}</span>
+                </div>
+            </div>
         </div>
-        <div class="rate-card-trend">
-            <span class="trend-icon-small ${trendClass}">${trendIcon}</span>
-            <button class="remove-favorite-btn" data-from="${from}" data-to="${to}" title="إزالة من المفضلة">×</button>
+        <div class="rate-card-chart">
+            ${chartSVG}
         </div>
+        <button class="remove-favorite-btn" data-from="${from}" data-to="${to}" title="إزالة من المفضلة">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2"/>
+            </svg>
+        </button>
     `;
     
     // إضافة حدث النقر للانتقال لصفحة التحويل
     card.onclick = (e) => {
-        // منع النقر إذا كان على زر الحذف
         if (e.target.closest('.remove-favorite-btn')) return;
         
-        // تعيين العملات في صفحة التحويل
         const currency1Select = document.getElementById('currency1');
         const currency2Select = document.getElementById('currency2');
         
@@ -93,19 +107,14 @@ function createRateCard(from, to, rates) {
             currency1Select.value = from;
             currency2Select.value = to;
             
-            // تحديث الأيقونات
-            const icon1 = document.getElementById('icon1');
-            const icon2 = document.getElementById('icon2');
-            if (icon1) icon1.innerHTML = `<img src="${getCurrencyIcon(from)}" alt="${from}" class="currency-icon-img">`;
-            if (icon2) icon2.innerHTML = `<img src="${getCurrencyIcon(to)}" alt="${to}" class="currency-icon-img">`;
+            // تحديث الأيقونات في صفحة التحويل
+            updateConvertPageIcons(from, to);
             
-            // تحديث المبالغ
+            // تحديث المبلغ إذا كان موجوداً
             const amount1 = document.getElementById('amount1');
             if (amount1 && amount1.value) {
-                // إعادة حساب التحويل
                 setTimeout(() => {
-                    const event = new Event('input');
-                    amount1.dispatchEvent(event);
+                    amount1.dispatchEvent(new Event('input'));
                 }, 100);
             }
             
@@ -118,12 +127,47 @@ function createRateCard(from, to, rates) {
     const removeBtn = card.querySelector('.remove-favorite-btn');
     removeBtn.onclick = (e) => {
         e.stopPropagation();
-        if (confirm(`هل تريد إزالة ${from}/${to} من المفضلة؟`)) {
-            toggleFavorite(from, to);
-        }
+        toggleFavorite(from, to);
     };
     
     return card;
+}
+
+// تحديث الأيقونات في صفحة التحويل
+function updateConvertPageIcons(from, to) {
+    const icon1 = document.getElementById('icon1');
+    const icon2 = document.getElementById('icon2');
+    
+    if (icon1) {
+        icon1.innerHTML = `<img src="${storageManager.getCurrencyImage(from)}" alt="${from}" class="currency-icon-img">`;
+    }
+    
+    if (icon2) {
+        icon2.innerHTML = `<img src="${storageManager.getCurrencyImage(to)}" alt="${to}" class="currency-icon-img">`;
+    }
+}
+
+// توليد شارت صغير
+function generateMiniChart() {
+    // إنشاء خطوط عشوائية للشارت
+    const points = [];
+    let y = 25;
+    
+    for (let i = 0; i < 8; i++) {
+        const x = i * 8;
+        y += (Math.random() - 0.5) * 15;
+        y = Math.max(5, Math.min(45, y));
+        points.push(`${x},${y}`);
+    }
+    
+    const color = Math.random() > 0.5 ? '#34c759' : '#ff3b30';
+    
+    return `
+        <svg width="64" height="30" viewBox="0 0 64 30" style="display: block;">
+            <polyline points="${points.join(' ')}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="56" cy="${points[points.length-1].split(',')[1]}" r="2" fill="${color}"/>
+        </svg>
+    `;
 }
 
 // إضافة/إزالة من المفضلة
@@ -155,7 +199,7 @@ export function loadFavorites() {
             CONFIG.FAVORITE_PAIRS.push(...pairs);
         }
     } catch (error) {
-        console.error('Error loading favorites:', error);
+        console.error('خطأ في تحميل المفضلة:', error);
     }
 }
 
@@ -163,31 +207,38 @@ export function loadFavorites() {
 export function showAddCurrencyDialog() {
     const dialog = document.createElement('div');
     dialog.className = 'dialog-overlay';
+    
+    const currenciesHTML = CONFIG.CURRENCIES.map(currency => `
+        <option value="${currency.code}">${currency.code} - ${currency.name}</option>
+    `).join('');
+    
     dialog.innerHTML = `
         <div class="dialog-content">
             <div class="dialog-header">
-                <h3>إضافة عملة مفضلة</h3>
+                <h3>إضافة عملة جديدة</h3>
                 <button class="close-dialog">&times;</button>
             </div>
             <div class="dialog-body">
                 <div class="currency-selection">
                     <div class="selection-group">
-                        <label>من:</label>
-                        <select id="addFromCurrency" class="currency-select-dialog">
-                            ${CONFIG.CURRENCIES.map(currency => 
-                                `<option value="${currency.code}">${currency.code} - ${currency.name}</option>`
-                            ).join('')}
-                        </select>
-                        <img src="${getCurrencyIcon(CONFIG.CURRENCIES[0].code)}" alt="From" class="dialog-currency-icon" id="dialogIconFrom">
+                        <div class="selection-label">من عملة:</div>
+                        <div class="selection-input">
+                            <select id="addFromCurrency" class="currency-select-dialog">
+                                ${currenciesHTML}
+                            </select>
+                            <img src="${storageManager.getCurrencyImage(CONFIG.CURRENCIES[0].code)}" 
+                                 alt="From" class="dialog-currency-icon" id="dialogIconFrom">
+                        </div>
                     </div>
                     <div class="selection-group">
-                        <label>إلى:</label>
-                        <select id="addToCurrency" class="currency-select-dialog">
-                            ${CONFIG.CURRENCIES.map(currency => 
-                                `<option value="${currency.code}">${currency.code} - ${currency.name}</option>`
-                            ).join('')}
-                        </select>
-                        <img src="${getCurrencyIcon(CONFIG.CURRENCIES[1].code)}" alt="To" class="dialog-currency-icon" id="dialogIconTo">
+                        <div class="selection-label">إلى عملة:</div>
+                        <div class="selection-input">
+                            <select id="addToCurrency" class="currency-select-dialog">
+                                ${currenciesHTML}
+                            </select>
+                            <img src="${storageManager.getCurrencyImage(CONFIG.CURRENCIES[1].code)}" 
+                                 alt="To" class="dialog-currency-icon" id="dialogIconTo">
+                        </div>
                     </div>
                 </div>
                 <div class="dialog-actions">
@@ -200,50 +251,49 @@ export function showAddCurrencyDialog() {
     
     document.body.appendChild(dialog);
     
-    // تحديث الأيقونات عند تغيير العملات
+    // تحديث الأيقونات
     const fromSelect = dialog.querySelector('#addFromCurrency');
     const toSelect = dialog.querySelector('#addToCurrency');
     const iconFrom = dialog.querySelector('#dialogIconFrom');
     const iconTo = dialog.querySelector('#dialogIconTo');
     
-    fromSelect.addEventListener('change', () => {
-        iconFrom.src = getCurrencyIcon(fromSelect.value);
+    fromSelect.addEventListener('change', async () => {
+        const code = fromSelect.value;
+        const iconUrl = `https://raw.githubusercontent.com/jamalkatabeuro-sketch/My-website/main/${getCurrencyInfo(code)?.icon || '101-currency-usd.png'}`;
+        await storageManager.cacheImage(iconUrl, code);
+        iconFrom.src = storageManager.getCurrencyImage(code);
     });
     
-    toSelect.addEventListener('change', () => {
-        iconTo.src = getCurrencyIcon(toSelect.value);
+    toSelect.addEventListener('change', async () => {
+        const code = toSelect.value;
+        const iconUrl = `https://raw.githubusercontent.com/jamalkatabeuro-sketch/My-website/main/${getCurrencyInfo(code)?.icon || '101-currency-usd.png'}`;
+        await storageManager.cacheImage(iconUrl, code);
+        iconTo.src = storageManager.getCurrencyImage(code);
     });
     
     // إغلاق النافذة
-    const closeBtn = dialog.querySelector('.close-dialog');
-    const cancelBtn = dialog.querySelector('.cancel-btn');
-    const addBtn = dialog.querySelector('.add-btn-dialog');
-    
     const closeDialog = () => {
         document.body.removeChild(dialog);
+        document.removeEventListener('keydown', escapeHandler);
     };
+    
+    const closeBtn = dialog.querySelector('.close-dialog');
+    const cancelBtn = dialog.querySelector('.cancel-btn');
     
     closeBtn.onclick = closeDialog;
     cancelBtn.onclick = closeDialog;
     
     dialog.onclick = (e) => {
-        if (e.target === dialog) {
-            closeDialog();
-        }
+        if (e.target === dialog) closeDialog();
     };
     
     // إضافة العملة
+    const addBtn = dialog.querySelector('.add-btn-dialog');
     addBtn.onclick = () => {
         const from = fromSelect.value;
         const to = toSelect.value;
         
-        if (from && to) {
-            if (from === to) {
-                alert('لا يمكن إضافة نفس العملة!');
-                return;
-            }
-            
-            // التحقق من عدم وجود الزوج مسبقاً
+        if (from && to && from !== to) {
             const exists = CONFIG.FAVORITE_PAIRS.some(
                 pair => pair.from === from && pair.to === to
             );
@@ -254,16 +304,16 @@ export function showAddCurrencyDialog() {
             } else {
                 alert('هذه العملة موجودة بالفعل في المفضلة!');
             }
+        } else {
+            alert('الرجاء اختيار عملتين مختلفتين');
         }
     };
     
-    // إضافة حدث Escape
-    document.addEventListener('keydown', function escapeHandler(e) {
-        if (e.key === 'Escape') {
-            closeDialog();
-            document.removeEventListener('keydown', escapeHandler);
-        }
-    });
+    // حدث Escape
+    const escapeHandler = (e) => {
+        if (e.key === 'Escape') closeDialog();
+    };
+    document.addEventListener('keydown', escapeHandler);
 }
 
 // عرض نافذة حذف عملات
@@ -275,15 +325,16 @@ export function showDeleteCurrencyDialog() {
     
     const dialog = document.createElement('div');
     dialog.className = 'dialog-overlay';
+    
     dialog.innerHTML = `
         <div class="dialog-content">
             <div class="dialog-header">
-                <h3>إدارة العملات المفضلة</h3>
+                <h3>إدارة المفضلة</h3>
                 <button class="close-dialog">&times;</button>
             </div>
             <div class="dialog-body">
                 <div style="color: var(--text-secondary); margin-bottom: 20px; font-size: 14px;">
-                    إضغط على × لإزالة عملة مفردة
+                    اضغط على أيقونة X لحذف عملة معينة
                 </div>
                 <div class="dialog-actions">
                     <button class="dialog-btn cancel-btn">إغلاق</button>
@@ -295,27 +346,25 @@ export function showDeleteCurrencyDialog() {
     
     document.body.appendChild(dialog);
     
-    // إغلاق النافذة
-    const closeBtn = dialog.querySelector('.close-dialog');
-    const cancelBtn = dialog.querySelector('.cancel-btn');
-    const deleteAllBtn = dialog.querySelector('.delete-all-btn');
-    
     const closeDialog = () => {
         document.body.removeChild(dialog);
+        document.removeEventListener('keydown', escapeHandler);
     };
+    
+    const closeBtn = dialog.querySelector('.close-dialog');
+    const cancelBtn = dialog.querySelector('.cancel-btn');
     
     closeBtn.onclick = closeDialog;
     cancelBtn.onclick = closeDialog;
     
     dialog.onclick = (e) => {
-        if (e.target === dialog) {
-            closeDialog();
-        }
+        if (e.target === dialog) closeDialog();
     };
     
     // حذف الكل
+    const deleteAllBtn = dialog.querySelector('.delete-all-btn');
     deleteAllBtn.onclick = () => {
-        if (confirm('هل أنت متأكد من حذف جميع العملات المفضلة؟')) {
+        if (confirm('هل تريد حذف جميع العملات المفضلة؟')) {
             CONFIG.FAVORITE_PAIRS.length = 0;
             localStorage.setItem('favoritePairs', JSON.stringify(CONFIG.FAVORITE_PAIRS));
             updateRatesDisplay();
@@ -323,11 +372,9 @@ export function showDeleteCurrencyDialog() {
         }
     };
     
-    // إضافة حدث Escape
-    document.addEventListener('keydown', function escapeHandler(e) {
-        if (e.key === 'Escape') {
-            closeDialog();
-            document.removeEventListener('keydown', escapeHandler);
-        }
-    });
+    // حدث Escape
+    const escapeHandler = (e) => {
+        if (e.key === 'Escape') closeDialog();
+    };
+    document.addEventListener('keydown', escapeHandler);
 }
