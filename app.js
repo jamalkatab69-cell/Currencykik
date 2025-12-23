@@ -1,12 +1,13 @@
-import { CONFIG, getCurrencyInfo } from './config.js';
+import { CONFIG, getCurrencyInfo, getCurrencyIcon } from './config.js';
 import { convertCurrency, getExchangeRate, loadCacheFromStorage, fetchAllRates } from './converter.js';
-import { updateRatesDisplay, loadFavorites } from './rates.js';
+import { updateRatesDisplay, loadFavorites, showAddCurrencyDialog, showDeleteCurrencyDialog } from './rates.js';
 import { initSettings, initSettingsPage } from './settings.js';
 
 // عناصر الصفحة
 let amountInput1, amountInput2;
 let currency1Select, currency2Select;
-let swapBtn, rateDisplay, lastUpdateDisplay;
+let swapBtn, rateDisplay;
+let icon1, icon2;
 
 // الصفحة الحالية
 let currentPage = 'convert';
@@ -55,7 +56,8 @@ function initElements() {
     currency2Select = document.getElementById('currency2');
     swapBtn = document.getElementById('swapBtn');
     rateDisplay = document.getElementById('rateDisplay');
-    lastUpdateDisplay = document.getElementById('lastUpdate');
+    icon1 = document.getElementById('icon1');
+    icon2 = document.getElementById('icon2');
 }
 
 // ملء قوائم العملات
@@ -75,6 +77,17 @@ function populateCurrencySelects() {
     // تعيين القيم الافتراضية
     currency1Select.value = 'USD';
     currency2Select.value = 'JPY';
+    updateCurrencyIcons();
+}
+
+// تحديث أيقونات العملات
+function updateCurrencyIcons() {
+    if (icon1) {
+        icon1.innerHTML = `<img src="${getCurrencyIcon(currency1Select.value)}" alt="${currency1Select.value}" class="currency-icon-img">`;
+    }
+    if (icon2) {
+        icon2.innerHTML = `<img src="${getCurrencyIcon(currency2Select.value)}" alt="${currency2Select.value}" class="currency-icon-img">`;
+    }
 }
 
 // تهيئة الأحداث
@@ -98,6 +111,7 @@ function initEvents() {
     
     // تحديث السعر عند تغيير العملة
     currency1Select.addEventListener('change', async () => {
+        updateCurrencyIcons();
         await updateRateDisplay();
         if (amountInput1.value) {
             await performConversion();
@@ -105,6 +119,7 @@ function initEvents() {
     });
     
     currency2Select.addEventListener('change', async () => {
+        updateCurrencyIcons();
         await updateRateDisplay();
         if (amountInput1.value) {
             await performConversion();
@@ -115,6 +130,12 @@ function initEvents() {
     document.getElementById('navSettings')?.addEventListener('click', () => showPage('settings'));
     document.getElementById('navConvert')?.addEventListener('click', () => showPage('convert'));
     document.getElementById('navRates')?.addEventListener('click', () => showPage('rates'));
+    
+    // زر إضافة العملات المفضلة
+    document.getElementById('addFavoriteBtn')?.addEventListener('click', showAddCurrencyDialog);
+    
+    // زر حذف العملات المفضلة
+    document.getElementById('deleteFavoriteBtn')?.addEventListener('click', showDeleteCurrencyDialog);
 }
 
 // تنفيذ التحويل
@@ -160,10 +181,6 @@ async function updateRateDisplay() {
                 <span class="trend-icon">${trendIcon}</span>
             `;
         }
-        
-        if (lastUpdateDisplay) {
-            lastUpdateDisplay.textContent = new Date().toLocaleTimeString('ar-SA');
-        }
     } catch (error) {
         console.error('Error updating rate display:', error);
     }
@@ -180,6 +197,9 @@ function swapCurrencies() {
     const tempAmount = amountInput1.value;
     amountInput1.value = amountInput2.value;
     amountInput2.value = tempAmount;
+    
+    // تحديث الأيقونات
+    updateCurrencyIcons();
     
     // تحديث السعر
     updateRateDisplay();
