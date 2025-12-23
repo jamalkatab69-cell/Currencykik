@@ -1,83 +1,10 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Currencykik - محول العملات</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div class="app-container">
-        <!-- Header -->
-        <header class="app-header">
-            <div class="logo">
-                <span class="logo-text">Pidmage</span>
-            </div>
-            <button class="menu-btn" id="menuBtn">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-        </header>
-
-        <!-- صفحة التحويل -->
-        <div id="convertPage" class="page active">
-            <h1 class="page-title">Convert</h1>
-            
-            <div class="converter-container">
-                <!-- العملة الأولى -->
-                <div class="currency-input-card">
-                    <input type="number" id="amount1" class="amount-input" value="1000" placeholder="0">
-                    <div class="currency-selector">
-                        <select id="currency1" class="currency-select">
-                            <!-- سيتم ملؤها من JS -->
-                        </select>
-                        <span class="currency-flag" id="flag1">🇺🇸</span>
-                    </div>
-                </div>
-
-                <!-- زر التبديل -->
-                <button class="swap-btn" id="swapBtn">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2"/>
-                        <path d="M17 14L12 9L7 14" stroke="currentColor" stroke-width="2"/>
-                    </svg>
-                </button>
-
-                <!-- العملة الثانية -->
-                <div class="currency-input-card">
-                    <input type="number" id="amount2" class="amount-input" value="0" readonly placeholder="0">
-                    <div class="currency-selector">
-                        <select id="currency2" class="currency-select">
-                            <!-- سيتم ملؤها من JS -->
-                        </select>
-                        <span class="currency-flag" id="flag2">🇯🇵</span>
-                    </div>
-                </div>
-
-                <!-- عرض السعر -->
-                <div class="rate-display" id="rateDisplay">
-                    <span>USD = 157.385 JPY at the mid-market 1 rate</span>
-                    <span class="trend-icon">↘</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- صفحة الأسعار -->
-        <div id="ratesPage" class="page">
-            <div class="page-header">
-                <h1 class="page-title">Rates</h1>
-                <button class="add-btn" id="addFavoriteBtn">+</button>
             </div>
             
             <div id="ratesContainer" class="rates-container">
                 <!-- سيتم ملؤها من JS -->
             </div>
             
-            <div class="update-info">
-                <span id="ratesLastUpdate">آخر تحديث: --</span>
-                <button class="refresh-btn" id="refreshRatesBtn">تحديث</button>
-            </div>
+            <!-- تمت إزالة قسم آخر تحديث -->
         </div>
 
         <!-- صفحة الإعدادات -->
