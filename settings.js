@@ -1,12 +1,12 @@
-// إعدادات التطبيق
+// App settings
 let appSettings = {
-    darkMode: 'on', // 'on', 'off', 'auto'
+    darkMode: 'on',
     baseCurrency: 'USD',
     decimals: 4,
     notifications: true
 };
 
-// تحميل الإعدادات
+// Load settings
 export function loadSettings() {
     try {
         const saved = localStorage.getItem('appSettings');
@@ -19,28 +19,25 @@ export function loadSettings() {
     return appSettings;
 }
 
-// حفظ الإعدادات
+// Save settings
 export function saveSettings(settings) {
     try {
         appSettings = { ...appSettings, ...settings };
         localStorage.setItem('appSettings', JSON.stringify(appSettings));
         applySettings();
-        
-        // إظهار رسالة تأكيد
-        showToast('تم حفظ الإعدادات');
+        showToast('Settings saved');
     } catch (error) {
         console.error('Error saving settings:', error);
-        showToast('خطأ في حفظ الإعدادات', 'error');
+        showToast('Error saving settings', 'error');
     }
 }
 
-// تطبيق الإعدادات
+// Apply settings
 export function applySettings() {
-    // تطبيق الوضع الداكن
     applyDarkMode(appSettings.darkMode);
 }
 
-// تطبيق الوضع الداكن
+// Apply dark mode
 function applyDarkMode(mode) {
     const html = document.documentElement;
     
@@ -58,9 +55,9 @@ function applyDarkMode(mode) {
     }
 }
 
-// عرض رسالة تأكيد
+// Show toast message
 function showToast(message, type = 'success') {
-    // إزالة أي رسالة سابقة
+    // Remove existing toast
     const existingToast = document.querySelector('.toast');
     if (existingToast) {
         existingToast.remove();
@@ -70,48 +67,9 @@ function showToast(message, type = 'success') {
     toast.className = `toast toast-${type}`;
     toast.textContent = message;
     
-    // إضافة أنماط CSS للـ toast
-    if (!document.querySelector('#toast-styles')) {
-        const style = document.createElement('style');
-        style.id = 'toast-styles';
-        style.textContent = `
-            .toast {
-                position: fixed;
-                top: 20px;
-                left: 50%;
-                transform: translateX(-50%);
-                background-color: var(--accent-color);
-                color: white;
-                padding: 12px 24px;
-                border-radius: 8px;
-                font-size: 14px;
-                font-weight: 500;
-                z-index: 10000;
-                animation: toastSlide 0.3s ease-out;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            }
-            
-            .toast-error {
-                background-color: var(--error-color);
-            }
-            
-            @keyframes toastSlide {
-                from {
-                    transform: translateX(-50%) translateY(-20px);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateX(-50%) translateY(0);
-                    opacity: 1;
-                }
-            }
-        `;
-        document.head.appendChild(style);
-    }
-    
     document.body.appendChild(toast);
     
-    // إزالة الرسالة بعد 3 ثوانٍ
+    // Remove after 3 seconds
     setTimeout(() => {
         if (toast.parentNode) {
             toast.style.opacity = '0';
@@ -125,45 +83,44 @@ function showToast(message, type = 'success') {
     }, 3000);
 }
 
-// تهيئة صفحة الإعدادات
+// Initialize settings page
 export function initSettingsPage() {
     const darkModeButtons = document.querySelectorAll('.dark-mode-btn');
     
-    // تحديد الزر النشط
+    // Set active button
     darkModeButtons.forEach(btn => {
         btn.classList.remove('active');
         if (btn.dataset.mode === appSettings.darkMode) {
             btn.classList.add('active');
         }
         
-        // إضافة حدث النقر
+        // Add click event
         btn.onclick = () => {
             saveSettings({ darkMode: btn.dataset.mode });
             
-            // تحديث الأزرار
+            // Update buttons
             darkModeButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
         };
     });
     
-    // إضافة أحداث لأزرار الإعدادات العامة
+    // Add events to setting buttons
     const settingButtons = document.querySelectorAll('.setting-btn');
     settingButtons.forEach((btn, index) => {
         btn.onclick = () => {
             if (index === 0) {
-                // زر تقييم التطبيق
-                showToast('شكراً لتقييمك التطبيق!');
-                // يمكن هنا فتح متجر التطبيقات أو صفحة التقييم
+                // Rate app button
+                showToast('Thank you for rating!');
+                // Here you can open app store or rating page
             } else if (index === 1) {
-                // زر الشروط والخصوصية
-                showToast('سيتم فتح صفحة الشروط والخصوصية');
-                // يمكن هنا فتح رابط أو نافذة جديدة
+                // Terms and privacy button
+                showToast('Opening terms and privacy...');
                 window.open('#', '_blank');
             }
         };
     });
     
-    // إضافة تأثيرات hover للأزرار
+    // Add hover effects
     const allButtons = document.querySelectorAll('button');
     allButtons.forEach(button => {
         button.addEventListener('mouseenter', function() {
@@ -173,28 +130,20 @@ export function initSettingsPage() {
         button.addEventListener('mouseleave', function() {
             this.style.transform = 'scale(1)';
         });
-        
-        button.addEventListener('mousedown', function() {
-            this.style.transform = 'scale(0.95)';
-        });
-        
-        button.addEventListener('mouseup', function() {
-            this.style.transform = 'scale(1.05)';
-        });
     });
 }
 
-// الحصول على الإعداد
+// Get setting
 export function getSetting(key) {
     return appSettings[key];
 }
 
-// تهيئة الإعدادات عند بدء التطبيق
+// Initialize settings on app start
 export function initSettings() {
     loadSettings();
     applySettings();
     
-    // مراقبة تغيير تفضيل النظام
+    // Watch for system preference changes
     if (appSettings.darkMode === 'auto') {
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
             if (appSettings.darkMode === 'auto') {
