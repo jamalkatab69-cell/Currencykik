@@ -1,4 +1,4 @@
-import { CONFIG, getCurrencyInfo } from './config.js';
+import { CONFIG, getCurrencyIconConvert } from './config.js';
 import { convertCurrency, getExchangeRate, loadCacheFromStorage, fetchAllRates } from './converter.js';
 import { updateRatesDisplay, loadFavorites, showAddCurrencyDialog, showDeleteCurrencyDialog } from './rates.js';
 import { initSettings, initSettingsPage } from './settings.js';
@@ -12,9 +12,9 @@ let icon1, icon2;
 
 // تهيئة التطبيق
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('محول العملات يعمل...');
+    console.log('Currency Converter loading...');
     
-    // تحميل التخزين والإعدادات
+    // تحميل الإعدادات والتخزين
     initSettings();
     loadCacheFromStorage();
     loadFavorites();
@@ -32,34 +32,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     initEvents();
     
     // تحميل الأسعار الأولية
-    await loadInitialRates();
+    await loadInitialData();
     
-    // عرض السعر الأولي
+    // تحديث السعر الافتراضي
     await updateRateDisplay();
     
     // تحديث تلقائي كل 30 دقيقة
     setInterval(async () => {
-        console.log('تحديث تلقائي للأسعار...');
+        console.log('Auto-refreshing rates...');
         await fetchAllRates();
         await updateDisplay();
     }, CONFIG.UPDATE_INTERVAL);
     
-    console.log('جاهز للاستخدام!');
+    console.log('Ready to use!');
 });
 
-// تحميل الأسعار الأولية
-async function loadInitialRates() {
+// تحميل البيانات الأولية
+async function loadInitialData() {
     try {
         const hasFreshRates = storageManager.hasFreshRates();
         
         if (!hasFreshRates) {
-            console.log('جارٍ تحميل أسعار جديدة...');
+            console.log('Fetching fresh rates...');
             await fetchAllRates();
         } else {
-            console.log('استخدام الأسعار المخزنة');
+            console.log('Using cached rates');
         }
     } catch (error) {
-        console.error('خطأ في تحميل الأسعار الأولية:', error);
+        console.error('Error loading initial data:', error);
     }
 }
 
@@ -75,41 +75,40 @@ function initElements() {
     icon2 = document.getElementById('icon2');
 }
 
-// ملء قوائم العملات
+// ملء قوائم العملات (للمحول)
 function populateCurrencySelects() {
     const selects = [currency1Select, currency2Select];
     
     selects.forEach(select => {
         select.innerHTML = '';
-        CONFIG.CURRENCIES.forEach(currency => {
+        CONFIG.CURRENCIES_CONVERT.forEach(currency => {
             const option = document.createElement('option');
             option.value = currency.code;
             option.textContent = `${currency.code} - ${currency.name}`;
-            option.style.direction = 'ltr';
             select.appendChild(option);
         });
     });
     
-    // تعيين القيم الافتراضية
+    // تعيين القيم الافتراضية (USD/SAR كما في الصورة)
     currency1Select.value = 'USD';
-    currency2Select.value = 'GBP'; // تغيير من JPY إلى GBP كما في الصورة
+    currency2Select.value = 'SAR';
     updateCurrencyIcons();
 }
 
-// تحديث أيقونات العملات
+// تحديث أيقونات المحول
 async function updateCurrencyIcons() {
     if (icon1 && currency1Select.value) {
         const fromCode = currency1Select.value;
-        const fromIcon = `https://raw.githubusercontent.com/jamalkatabeuro-sketch/My-website/main/${getCurrencyInfo(fromCode)?.icon || '101-currency-usd.png'}`;
-        await storageManager.cacheImage(fromIcon, fromCode);
-        icon1.innerHTML = `<img src="${storageManager.getCurrencyImage(fromCode)}" alt="${fromCode}" class="currency-icon-img">`;
+        const fromIcon = getCurrencyIconConvert(fromCode);
+        await storageManager.cacheImage(fromIcon, fromCode + '_convert');
+        icon1.innerHTML = `<img src="${storageManager.getCurrencyImage(fromCode + '_convert')}" alt="${fromCode}">`;
     }
     
     if (icon2 && currency2Select.value) {
         const toCode = currency2Select.value;
-        const toIcon = `https://raw.githubusercontent.com/jamalkatabeuro-sketch/My-website/main/${getCurrencyInfo(toCode)?.icon || '101-currency-usd.png'}`;
-        await storageManager.cacheImage(toIcon, toCode);
-        icon2.innerHTML = `<img src="${storageManager.getCurrencyImage(toCode)}" alt="${toCode}" class="currency-icon-img">`;
+        const toIcon = getCurrencyIconConvert(toCode);
+        await storageManager.cacheImage(toIcon, toCode + '_convert');
+        icon2.innerHTML = `<img src="${storageManager.getCurrencyImage(toCode + '_convert')}" alt="${toCode}">`;
     }
 }
 
@@ -124,7 +123,7 @@ function initEvents() {
         }
     });
     
-    // تحويل عند الضغط على Enter
+    // تحويل عند Enter
     amountInput1.addEventListener('keypress', async (e) => {
         if (e.key === 'Enter') {
             await performConversion();
@@ -151,7 +150,7 @@ function initEvents() {
         }
     });
     
-    // التنقل بين الصفحات
+    // أزرار التنقل
     document.getElementById('navSettings')?.addEventListener('click', () => showPage('settings'));
     document.getElementById('navConvert')?.addEventListener('click', () => showPage('convert'));
     document.getElementById('navRates')?.addEventListener('click', () => showPage('rates'));
@@ -173,7 +172,7 @@ async function performConversion() {
     const from = currency1Select.value;
     const to = currency2Select.value;
     
-    // إظهار تحميل مؤقت
+    // إظهار تحميل
     amountInput2.value = '...';
     
     try {
@@ -184,15 +183,15 @@ async function performConversion() {
             await updateRateDisplay();
         } else {
             amountInput2.value = 'Error';
-            console.error('فشل التحويل:', result.error);
+            console.error('Conversion failed:', result.error);
         }
     } catch (error) {
         amountInput2.value = 'Error';
-        console.error('خطأ في التحويل:', error);
+        console.error('Conversion error:', error);
     }
 }
 
-// تحديث عرض السعر (كما في الصورة الأولى)
+// تحديث عرض السعر
 async function updateRateDisplay() {
     const from = currency1Select.value;
     const to = currency2Select.value;
@@ -203,15 +202,13 @@ async function updateRateDisplay() {
         if (rate && rateDisplay) {
             const formattedRate = rate.toFixed(4);
             rateDisplay.innerHTML = `
-                <span>${from} = ${formattedRate} ${to} at the mid-market 1 rate</span>
-                <span class="trend-icon">↘</span>
+                <span>${from} = ${formattedRate} ${to}</span> at the mid-market 1 rate
             `;
         }
     } catch (error) {
-        console.error('خطأ في تحديث السعر:', error);
+        console.error('Error updating rate:', error);
         rateDisplay.innerHTML = `
-            <span>${from} = --- ${to}</span>
-            <span class="trend-icon">↘</span>
+            <span>${from} = --- ${to}</span> at the mid-market 1 rate
         `;
     }
 }
@@ -241,7 +238,7 @@ async function swapCurrencies() {
         await performConversion();
     }
     
-    // تأثير زر التبديل
+    // تأثير الزر
     swapBtn.style.transform = 'scale(0.95)';
     setTimeout(() => {
         swapBtn.style.transform = 'scale(1)';
