@@ -1,0 +1,74 @@
+{
+  "patterns": [
+    {
+      "id": "straight",
+      "name": "Straight Line",
+      "description": "خط مستقيم",
+      "lanes": [1, 1, 1, 1, 1],
+      "obstacles": [0, 0, 1, 0, 1],
+      "collectibles": [1, 0, 0, 1, 0]
+    },
+    {
+      "id": "zigzag",
+      "name": "Zigzag",
+      "description": "متعرج",
+      "lanes": [0, 1, 2, 1, 0],
+      "obstacles": [0, 1, 0, 1, 0],
+      "collectibles": [1, 0, 1, 0, 1]
+    },
+    {
+      "id": "alternating",
+      "name": "Alternating",
+      "description": "متبادل",
+      "lanes": [0, 2, 0, 2, 0],
+      "obstacles": [1, 0, 1, 0, 1],
+      "collectibles": [0, 1, 0, 1, 0]
+    },
+    {
+      "id": "wave",
+      "name": "Wave",
+      "description": "موجة",
+      "lanes": [1, 2, 2, 1, 0],
+      "obstacles": [0, 0, 1, 1, 0],
+      "collectibles": [1, 1, 0, 0, 1]
+    },
+    {
+      "id": "challenge",
+      "name": "Challenge",
+      "description": "تحدي",
+      "lanes": [0, 1, 2, 1, 0],
+      "obstacles": [1, 1, 1, 1, 1],
+      "collectibles": [0, 0, 0, 0, 0]
+    },
+    {
+      "id": "collect_run",
+      "name": "Collect Run",
+      "description": "جمع المكافآت",
+      "lanes": [1, 1, 1, 1, 1],
+      "obstacles": [0, 0, 0, 0, 0],
+      "collectibles": [1, 1, 1, 1, 1]
+    }
+  ],
+  "patternProbabilities": {
+    "easy": {
+      "straight": 0.4,
+      "zigzag": 0.3,
+      "alternating": 0.2,
+      "wave": 0.1
+    },
+    "medium": {
+      "straight": 0.3,
+      "zigzag": 0.3,
+      "alternating": 0.2,
+      "wave": 0.15,
+      "challenge": 0.05
+    },
+    "hard": {
+      "straight": 0.2,
+      "zigzag": 0.25,
+      "alternating": 0.25,
+      "wave": 0.2,
+      "challenge": 0.1
+    }
+  }
+}
