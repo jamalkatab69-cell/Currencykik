@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Rush 3D - لعبة جري لا نهائية احترافية">
+    <title>Rush 3D - Game</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="stylesheet" href="/styles/ui.css">
+    <link rel="stylesheet" href="/styles/animations.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="screen active">
+        <div class="loading-content">
+            <div class="logo">RUSH 3D</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <p class="loading-text">جاري التحميل...</p>
+        </div>
+    </div>
+
+    <!-- Main Menu -->
+    <div id="main-menu" class="screen">
+        <div class="menu-container">
+            <h1 class="game-title">RUSH 3D</h1>
+            <div class="best-score">
+                <span>أفضل نتيجة:</span>
+                <span id="best-score-value">0</span>
+            </div>
+            <div class="menu-buttons">
+                <button id="play-btn" class="btn btn-primary">ابدأ اللعب</button>
+                <button id="settings-btn" class="btn btn-secondary">الإعدادات</button>
+                <button id="leaderboard-btn" class="btn btn-secondary">لوحة الصدارة</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game UI -->
+    <div id="game-ui" class="screen">
+        <div class="top-bar">
+            <div class="score-container">
+                <span class="score-label">النقاط:</span>
+                <span id="score" class="score-value">0</span>
+            </div>
+            <button id="pause-btn" class="icon-btn">⏸</button>
+        </div>
+        <div class="game-info">
+            <div id="speed-indicator" class="indicator">
+                <span>السرعة: </span>
+                <span id="speed-value">1.0x</span>
+            </div>
+        </div>
+        <!-- Touch Controls for Mobile -->
+        <div id="touch-controls" class="touch-controls">
+            <div class="control-hint">اسحب لليمين أو اليسار</div>
+        </div>
+    </div>
+
+    <!-- Pause Menu -->
+    <div id="pause-menu" class="screen overlay">
+        <div class="menu-container">
+            <h2>متوقف مؤقتاً</h2>
+            <div class="menu-buttons">
+                <button id="resume-btn" class="btn btn-primary">متابعة</button>
+                <button id="restart-btn" class="btn btn-secondary">إعادة البدء</button>
+                <button id="menu-btn" class="btn btn-secondary">القائمة الرئيسية</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="gameover-screen" class="screen overlay">
+        <div class="menu-container">
+            <h2 class="gameover-title">انتهت اللعبة!</h2>
+            <div class="score-summary">
+                <div class="final-score">
+                    <span>نقاطك:</span>
+                    <span id="final-score" class="big-number">0</span>
+                </div>
+                <div id="new-record" class="new-record hidden">
+                    🏆 رقم قياسي جديد! 🏆
+                </div>
+            </div>
+            <div class="menu-buttons">
+                <button id="retry-btn" class="btn btn-primary">حاول مرة أخرى</button>
+                <button id="home-btn" class="btn btn-secondary">القائمة الرئيسية</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Menu -->
+    <div id="settings-menu" class="screen overlay">
+        <div class="menu-container">
+            <h2>الإعدادات</h2>
+            <div class="settings-list">
+                <div class="setting-item">
+                    <label>الموسيقى</label>
+                    <input type="checkbox" id="music-toggle" checked>
+                </div>
+                <div class="setting-item">
+                    <label>المؤثرات الصوتية</label>
+                    <input type="checkbox" id="sfx-toggle" checked>
+                </div>
+                <div class="setting-item">
+                    <label>الاهتزاز</label>
+                    <input type="checkbox" id="vibration-toggle" checked>
+                </div>
+                <div class="setting-item">
+                    <label>جودة الرسومات</label>
+                    <select id="quality-select">
+                        <option value="low">منخفضة</option>
+                        <option value="medium" selected>متوسطة</option>
+                        <option value="high">عالية</option>
+                    </select>
+                </div>
+            </div>
+            <button id="settings-back-btn" class="btn btn-primary">رجوع</button>
+        </div>
+    </div>
+
+    <!-- Game Canvas -->
+    <canvas id="game-canvas"></canvas>
+
+    <!-- Scripts -->
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>
