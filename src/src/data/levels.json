@@ -1,0 +1,63 @@
+{
+  "levels": [
+    {
+      "id": 1,
+      "name": "Beginner",
+      "description": "مستوى المبتدئين",
+      "difficulty": "easy",
+      "speedMultiplier": 0.8,
+      "obstacleChance": 0.5,
+      "collectibleChance": 0.4,
+      "unlocked": true
+    },
+    {
+      "id": 2,
+      "name": "Intermediate",
+      "description": "مستوى متوسط",
+      "difficulty": "medium",
+      "speedMultiplier": 1.0,
+      "obstacleChance": 0.7,
+      "collectibleChance": 0.3,
+      "unlocked": false,
+      "unlockScore": 100
+    },
+    {
+      "id": 3,
+      "name": "Advanced",
+      "description": "مستوى متقدم",
+      "difficulty": "hard",
+      "speedMultiplier": 1.3,
+      "obstacleChance": 0.85,
+      "collectibleChance": 0.25,
+      "unlocked": false,
+      "unlockScore": 500
+    },
+    {
+      "id": 4,
+      "name": "Expert",
+      "description": "مستوى الخبراء",
+      "difficulty": "expert",
+      "speedMultiplier": 1.5,
+      "obstacleChance": 0.9,
+      "collectibleChance": 0.2,
+      "unlocked": false,
+      "unlockScore": 1000
+    },
+    {
+      "id": 5,
+      "name": "Master",
+      "description": "مستوى الماسترز",
+      "difficulty": "master",
+      "speedMultiplier": 2.0,
+      "obstacleChance": 0.95,
+      "collectibleChance": 0.15,
+      "unlocked": false,
+      "unlockScore": 2000
+    }
+  ],
+  "endless": {
+    "name": "Endless",
+    "description": "اللعب بلا نهاية",
+    "progressiveDifficulty": true
+  }
+}
