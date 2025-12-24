@@ -1,0 +1,124 @@
+{
+  "achievements": [
+    {
+      "id": "first_steps",
+      "name": "First Steps",
+      "nameAr": "الخطوات الأولى",
+      "description": "Complete your first game",
+      "descriptionAr": "أكمل لعبتك الأولى",
+      "icon": "🎮",
+      "requirement": {
+        "type": "games_played",
+        "value": 1
+      }
+    },
+    {
+      "id": "century",
+      "name": "Century",
+      "nameAr": "المائة",
+      "description": "Score 100 points",
+      "descriptionAr": "احصل على 100 نقطة",
+      "icon": "💯",
+      "requirement": {
+        "type": "score",
+        "value": 100
+      }
+    },
+    {
+      "id": "collector",
+      "name": "Collector",
+      "nameAr": "الجامع",
+      "description": "Collect 50 stars",
+      "descriptionAr": "اجمع 50 نجمة",
+      "icon": "⭐",
+      "requirement": {
+        "type": "collectibles",
+        "value": 50
+      }
+    },
+    {
+      "id": "combo_master",
+      "name": "Combo Master",
+      "nameAr": "سيد السلاسل",
+      "description": "Reach a 10x combo",
+      "descriptionAr": "احصل على سلسلة 10x",
+      "icon": "🔥",
+      "requirement": {
+        "type": "combo",
+        "value": 10
+      }
+    },
+    {
+      "id": "speed_demon",
+      "name": "Speed Demon",
+      "nameAr": "شيطان السرعة",
+      "description": "Reach maximum speed",
+      "descriptionAr": "اصل للسرعة القصوى",
+      "icon": "⚡",
+      "requirement": {
+        "type": "speed",
+        "value": 2.0
+      }
+    },
+    {
+      "id": "survivor",
+      "name": "Survivor",
+      "nameAr": "الناجي",
+      "description": "Survive for 60 seconds",
+      "descriptionAr": "انج لمدة 60 ثانية",
+      "icon": "🏆",
+      "requirement": {
+        "type": "time",
+        "value": 60
+      }
+    },
+    {
+      "id": "high_score_500",
+      "name": "High Scorer",
+      "nameAr": "الأعلى نقاطاً",
+      "description": "Score 500 points",
+      "descriptionAr": "احصل على 500 نقطة",
+      "icon": "🎯",
+      "requirement": {
+        "type": "score",
+        "value": 500
+      }
+    },
+    {
+      "id": "high_score_1000",
+      "name": "Elite Player",
+      "nameAr": "اللاعب النخبة",
+      "description": "Score 1000 points",
+      "descriptionAr": "احصل على 1000 نقطة",
+      "icon": "👑",
+      "requirement": {
+        "type": "score",
+        "value": 1000
+      }
+    },
+    {
+      "id": "marathon",
+      "name": "Marathon Runner",
+      "nameAr": "عداء الماراثون",
+      "description": "Play 10 games",
+      "descriptionAr": "العب 10 مرات",
+      "icon": "🏃",
+      "requirement": {
+        "type": "games_played",
+        "value": 10
+      }
+    },
+    {
+      "id": "perfectionist",
+      "name": "Perfectionist",
+      "nameAr": "المثالي",
+      "description": "Complete a run without hitting obstacles",
+      "descriptionAr": "أكمل جولة بدون الاصطدام بالعوائق",
+      "icon": "✨",
+      "requirement": {
+        "type": "perfect_run",
+        "value": 1
+      }
+    }
+  ]
+}
